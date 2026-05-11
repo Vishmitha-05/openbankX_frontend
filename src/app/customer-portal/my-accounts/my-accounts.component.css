@@ -1,0 +1,3 @@
+.account-card { cursor:pointer; }
+.account-card.selected-account { border-color:var(--accent-blue);box-shadow:var(--shadow-glow); }
+.acc-icon { width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem; }

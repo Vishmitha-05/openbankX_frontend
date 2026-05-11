@@ -1,0 +1,4 @@
+/* Button spacing for actions */
+.btn + .btn {
+  margin-left: 8px;
+}

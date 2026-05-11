@@ -1,0 +1,13 @@
+.app-icon-sm {
+  width: 32px;
+  height: 32px;
+  background: rgba(102, 126, 234, 0.12);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-blue);
+  font-size: 0.85rem;
+}
+.scope-pill { margin: 2px; }
+

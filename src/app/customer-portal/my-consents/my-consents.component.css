@@ -1,0 +1,2 @@
+.consent-dates { display: flex; flex-direction: column; gap: 4px; }
+.consent-card { animation: fadeInUp 0.4s ease both; }

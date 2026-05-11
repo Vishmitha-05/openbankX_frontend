@@ -1,0 +1,145 @@
+<div class="page-content">
+  <div class="page-header">
+    <div>
+      <h1><i class="fas fa-plug"></i> Subscribe to API Plan</h1>
+      <p class="page-subtitle">Connect your TPP app to an API product plan</p>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="isLoading"><div class="spinner"></div><span>Loading plans...</span></div>
+
+  <div *ngIf="!isLoading">
+    <div class="alert alert-error" *ngIf="errorMessage"><i class="fas fa-exclamation-circle"></i> {{ errorMessage }}</div>
+    <div class="alert alert-success" *ngIf="successMessage"><i class="fas fa-check-circle"></i> {{ successMessage }}</div>
+
+    <!-- Plan cards -->
+    <div class="grid-3 mb-20">
+      <div *ngFor="let plan of plans" class="glass-card plan-card"
+           [ngClass]="{ 'selected-plan': selectedPlanId === plan.planId }"
+           (click)="selectedPlanId = plan.planId"
+           role="button"
+           tabindex="0"
+           aria-pressed="{{ selectedPlanId === plan.planId }}"
+           title="Click to select this plan">
+        <div class="flex items-center justify-between mb-12">
+          <span class="badge" [ngClass]="plan.environment === 'SANDBOX' ? 'badge-info' : 'badge-active'">{{ plan.environment }}</span>
+          <span class="text-sm text-muted">#{{ plan.planId }}</span>
+        </div>
+        <h4>{{ plan.apiProduct?.name || 'API Product' }}</h4>
+        <div class="plan-stats mt-12">
+          <div><span class="text-sm text-muted">Rate Limit</span><br><strong>{{ plan.rateLimitPerMin }}/min</strong></div>
+          <div><span class="text-sm text-muted">Daily Quota</span><br><strong>{{ plan.dailyQuota | number }}</strong></div>
+          <div><span class="text-sm text-muted">SLA</span><br><strong>{{ plan.sla }}%</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Select App + Selected Plan -->
+    <div class="glass-card max-w-500">
+      <div class="form-row">
+        <div class="form-column">
+          <div class="form-group">
+            <label>Select Your App</label>
+            <select class="form-control" [(ngModel)]="selectedAppId" (ngModelChange)="onAppChange()">
+          <option [ngValue]="null" disabled>Choose an app</option>
+          <optgroup label="Approved Apps">
+            <option *ngFor="let app of getApprovedApps()" [ngValue]="app.tppAppId">
+              {{ app.appName }} ({{ app.status }})
+            </option>
+          </optgroup>
+          <optgroup label="Rejected Apps (Disabled)">
+            <option *ngFor="let app of getRejectedApps()" [ngValue]="null" disabled>
+              {{ app.appName }} (Rejected)
+            </option>
+          </optgroup>
+        </select>
+      </div>
+        </div>
+        <div class="form-column selected-plan-summary">
+          <label>Selected Plan</label>
+          <div *ngIf="selectedPlan; else noPlan" class="plan-summary-box">
+            <div class="plan-summary-title">Selected plan details</div>
+            <div class="plan-summary-field">
+              <span>Product</span>
+              <strong>{{ selectedPlan.apiProduct?.name || 'API Product' }}</strong>
+            </div>
+            <div class="plan-summary-field">
+              <span>Environment</span>
+              <strong>{{ selectedPlan.environment }}</strong>
+            </div>
+            <div class="plan-summary-field">
+              <span>Plan ID</span>
+              <strong>#{{ selectedPlan.planId }}</strong>
+            </div>
+            <div class="plan-summary-field">
+              <span>Rate</span>
+              <strong>{{ selectedPlan.rateLimitPerMin }}/min</strong>
+            </div>
+            <div class="plan-summary-field">
+              <span>Quota</span>
+              <strong>{{ selectedPlan.dailyQuota | number }}</strong>
+            </div>
+          </div>
+          <ng-template #noPlan>
+            <div class="text-muted">Click a plan card above to select one.</div>
+          </ng-template>
+        </div>
+      </div>
+      <div class="alert alert-warning" *ngIf="selectedAppStatus === 'PENDING'">
+        <i class="fas fa-exclamation-triangle"></i> This app is pending approval. You can subscribe but it requires admin approval first.
+      </div>
+      <div class="alert alert-error" *ngIf="selectedAppStatus === 'REJECTED'">
+        <i class="fas fa-ban"></i> This app has been rejected by the admin. You cannot subscribe with this app.
+      </div>
+      <button class="btn btn-primary btn-full" (click)="subscribe()" [disabled]="isSubscribing || selectedAppStatus === 'REJECTED' || selectedPlanId == null || selectedAppId == null">
+        <span *ngIf="!isSubscribing"><i class="fas fa-link"></i> Subscribe</span>
+        <span *ngIf="isSubscribing"><i class="fas fa-spinner fa-spin"></i> Subscribing...</span>
+      </button>
+    </div>
+
+    <!-- Active Subscriptions for Selected App -->
+    <div class="glass-card mt-20" *ngIf="selectedAppId && subscriptions.length > 0">
+      <h3 class="mb-16"><i class="fas fa-clipboard-list"></i> Active Subscriptions</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Plan</th>
+            <th>Product</th>
+            <th>Environment</th>
+            <th>Status</th>
+            <th>Subscribed</th>
+            <th>Expires</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sub of subscriptions">
+            <td>#{{ sub.subscriptionId }}</td>
+            <td>#{{ sub.apiPlan?.planId }}</td>
+            <td>{{ sub.apiPlan?.apiProduct?.name || '—' }}</td>
+            <td>
+              <span class="badge" [ngClass]="sub.apiPlan?.environment === 'SANDBOX' ? 'badge-info' : 'badge-active'">
+                {{ sub.apiPlan?.environment || '—' }}
+              </span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-active': sub.status === 'ACTIVE',
+                'badge-revoked': sub.status === 'SUSPENDED',
+                'badge-expired': sub.status === 'CANCELLED'
+              }">{{ sub.status }}</span>
+            </td>
+            <td class="text-sm">{{ sub.subscribedDate | date:'mediumDate' }}</td>
+            <td class="text-sm">{{ sub.expiryDate | date:'mediumDate' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-state" *ngIf="selectedAppId && subscriptions.length === 0" style="margin-top:20px">
+      <i class="fas fa-inbox"></i>
+      <p>No subscriptions yet for this app</p>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,75 @@
+<div class="page-content">
+  <div class="page-header">
+    <div>
+      <h1><i class="fas fa-paper-plane"></i> Initiate Payment</h1>
+      <p class="page-subtitle">Securely transfer funds via PSD2 PISP API</p>
+    </div>
+  </div>
+
+  <!-- NO PERMISSION -->
+  <div class="glass-card" *ngIf="!isCheckingPermission && !hasPaymentAccess" style="text-align:center; padding:40px; max-width:600px;">
+    <i class="fas fa-lock" style="font-size:2.5rem; color:#f59e0b; margin-bottom:16px;"></i>
+    <h3>No Payment Permission</h3>
+    <p class="text-muted mt-8">You don't have an active consent with <strong>payments:write</strong> permission.</p>
+    <p class="text-muted">Grant access to a TPP app first.</p>
+    <a class="btn btn-primary mt-16" href="/customer/apps">
+      <i class="fas fa-store"></i> Browse Apps
+    </a>
+  </div>
+
+  <!-- LOADING PERMISSION -->
+  <div class="loading-container" *ngIf="isCheckingPermission"><div class="spinner"></div><span>Checking permissions...</span></div>
+
+  <div class="glass-card max-w-600" *ngIf="!isCheckingPermission && hasPaymentAccess">
+    <!-- Alerts -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+    </div>
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="fas fa-check-circle"></i> {{ successMessage }}
+    </div>
+
+    <!-- From Account -->
+    <div class="form-group">
+      <label>From Account (Debtor)</label>
+      <select class="form-control" [(ngModel)]="selectedAccountId">
+        <option [ngValue]="null" disabled>Select an account</option>
+        <option *ngFor="let acc of accounts" [ngValue]="acc.accountId">
+          {{ acc.accountNumberMasked }} ({{ acc.currency }}) - {{ acc.type }}
+        </option>
+      </select>
+    </div>
+
+    <!-- To Account -->
+    <div class="form-group">
+      <label>To Account (Creditor IBAN / Account Number)</label>
+      <input type="text" class="form-control" placeholder="Enter recipient account details" [(ngModel)]="payeeAccount">
+    </div>
+
+    <!-- Amount -->
+    <div class="form-group">
+      <label>Amount (GBP)</label>
+      <div class="input-icon">
+        <i class="fas fa-pound-sign"></i>
+        <input type="number" class="form-control with-icon" placeholder="0.00" [(ngModel)]="amount">
+      </div>
+    </div>
+
+    <!-- Narrative -->
+    <div class="form-group">
+      <label>Reference / Narrative (Optional)</label>
+      <input type="text" class="form-control" placeholder="Payment reference" [(ngModel)]="narrative">
+    </div>
+
+    <div class="flex gap-16 mt-20">
+      <button class="btn btn-primary flex-1" (click)="submitPayment()" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting"><i class="fas fa-check"></i> Authorize & Execute</span>
+        <span *ngIf="isSubmitting"><i class="fas fa-spinner fa-spin"></i> Processing...</span>
+      </button>
+      <button class="btn btn-secondary flex-1" (click)="cancel()" [disabled]="isSubmitting">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+    </div>
+  </div>
+</div>
+

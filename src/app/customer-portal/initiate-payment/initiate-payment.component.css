@@ -1,0 +1,7 @@
+.max-w-600 {
+  max-width: 600px;
+  margin: 0 auto;
+}
+.gap-16 { gap: 16px; }
+.mt-20 { margin-top: 20px; }
+.flex-1 { flex: 1; }
