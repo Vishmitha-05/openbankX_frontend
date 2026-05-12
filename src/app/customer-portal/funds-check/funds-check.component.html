@@ -1,60 +1,89 @@
 <div class="page-content">
+
   <div class="page-header">
-    <div>
-      <h1><i class="fas fa-search-dollar"></i> Funds Confirmation</h1>
-      <p class="page-subtitle">CBPII — Check if sufficient funds are available</p>
-    </div>
+    <h1>
+      <i class="fas fa-search-dollar"></i>
+      Funds Confirmation
+    </h1>
+    <p class="page-subtitle" *ngIf="appName">
+      Accessed via <strong>{{ appName }}</strong>
+    </p>
   </div>
 
-  <!-- NO PERMISSION -->
-  <div class="glass-card" *ngIf="!isCheckingPermission && !hasFundsAccess" style="text-align:center; padding:40px; max-width:600px;">
-    <i class="fas fa-lock" style="font-size:2.5rem; color:#f59e0b; margin-bottom:16px;"></i>
-    <h3>No Funds Check Permission</h3>
-    <p class="text-muted mt-8">You don't have an active consent with <strong>funds:read</strong> permission.</p>
-    <p class="text-muted">Grant access to a TPP app first.</p>
+  <!-- BLOCKED -->
+  <div
+    class="glass-card text-center"
+    *ngIf="!isCheckingPermission && !hasFundsAccess"
+  >
+    <i class="fas fa-lock lock-icon"></i>
+    <h3>Access Restricted</h3>
+    <p class="text-muted">{{ errorMessage }}</p>
     <button class="btn btn-primary mt-16" (click)="goToBrowseApps()">
-      <i class="fas fa-store"></i> Browse Apps
+      Browse Apps
     </button>
   </div>
 
-  <!-- LOADING PERMISSION -->
-  <div class="loading-container" *ngIf="isCheckingPermission"><div class="spinner"></div><span>Checking permissions...</span></div>
+  <!-- LOADING -->
+  <div class="loading-container" *ngIf="isCheckingPermission">
+    <div class="spinner"></div>
+    Checking consent...
+  </div>
 
-  <div class="glass-card max-w-600" *ngIf="!isCheckingPermission && hasFundsAccess">
+  <!-- FUNDS CHECK -->
+  <div class="glass-card max-w-600"
+    *ngIf="!isCheckingPermission && hasFundsAccess">
+
     <div class="form-group">
       <label>Select Account</label>
-      <select class="form-control" [(ngModel)]="selectedAccountId">
-        <option [ngValue]="null" disabled>Choose an account</option>
-        <option *ngFor="let acc of accounts" [ngValue]="acc.accountId">
-          {{ acc.accountNumberMasked }} ({{ acc.currency }}) — {{ acc.type }}
+      <select class="form-control" [(ngModel)]="selectedAccount">
+        <option [ngValue]="null" disabled>Select an account</option>
+        <option *ngFor="let acc of accounts" [ngValue]="acc">
+          {{ acc.accountNumberMasked }}
         </option>
       </select>
     </div>
 
     <div class="form-group">
       <label>Amount to Check</label>
-      <div class="input-icon">
-        <i class="fas fa-pound-sign"></i>
-        <input type="number" class="form-control with-icon" placeholder="0.00" [(ngModel)]="amount">
-      </div>
+      <input
+        type="number"
+        class="form-control"
+        placeholder="0.00"
+        [(ngModel)]="amount"
+      />
     </div>
 
-    <button class="btn btn-primary btn-full" (click)="checkFunds()" [disabled]="isChecking || !selectedAccountId || !amount">
-      <span *ngIf="!isChecking"><i class="fas fa-search"></i> Check Funds</span>
-      <span *ngIf="isChecking"><i class="fas fa-spinner fa-spin"></i> Checking...</span>
+    <button class="btn btn-primary btn-full" (click)="checkFunds()">
+      <i class="fas fa-search"></i> Check Funds
     </button>
 
-    <!-- Result -->
-    <div class="funds-result mt-20" *ngIf="result" [ngStyle]="{ 'border-left': '4px solid ' + result.color }">
-      <div class="result-icon" [ngStyle]="{ 'color': result.color }">
-        <i [class]="result.icon" style="font-size: 2rem;"></i>
-      </div>
-      <div class="result-info">
-        <h3 [ngStyle]="{ 'color': result.color }">{{ result.status }}</h3>
-        <p>{{ result.message }}</p>
-        <p class="text-sm text-muted">Checked: {{ amount | number:'1.2-2' }} {{ currency }}</p>
-      </div>
+    <div *ngIf="result" class="funds-result mt-20"
+         [class.success]="result.sufficient"
+         [class.error]="!result.sufficient">
+
+      <h3 *ngIf="result.sufficient" class="text-success">
+        ✅ Yes, the necessary fund is present in your account
+      </h3>
+
+      <h3 *ngIf="!result.sufficient" class="text-error">
+        ❌ No, the necessary funds are insufficient
+      </h3>
+
+      <p class="mt-8">
+        Account Balance:
+        <strong>
+          {{ selectedAccount?.currency }}
+          {{ result.balance | number:'1.2-2' }}
+        </strong>
+      </p>
+
+      <p *ngIf="!result.sufficient" class="mt-4">
+        Additional amount required:
+        <strong>
+          {{ selectedAccount?.currency }}
+          {{ result.shortage | number:'1.2-2' }}
+        </strong>
+      </p>
     </div>
   </div>
 </div>
-

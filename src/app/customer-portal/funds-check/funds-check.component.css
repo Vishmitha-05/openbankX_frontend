@@ -1,10 +1,30 @@
-.max-w-600 { max-width: 600px; margin: 0 auto; }
+.max-w-600 {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.mt-16 { margin-top: 16px; }
 .mt-20 { margin-top: 20px; }
+
+.lock-icon {
+  font-size: 2.5rem;
+  color: #f59e0b;
+  margin-bottom: 16px;
+}
+
 .funds-result {
-  display: flex; align-items: center; gap: 20px;
-  padding: 20px; border-radius: 12px;
+  padding: 20px;
+  border-radius: 12px;
   background: rgba(255,255,255,0.6);
 }
-.result-icon { flex-shrink: 0; }
-.result-info h3 { margin: 0 0 4px; }
-.result-info p { margin: 0; }
+
+.funds-result.success {
+  border-left: 5px solid #10b981;
+}
+
+.funds-result.error {
+  border-left: 5px solid #ef4444;
+}
+
+.text-success { color: #10b981; }
+.text-error { color: #ef4444; }

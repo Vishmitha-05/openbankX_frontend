@@ -188,7 +188,9 @@ export interface AccountRef {
   type: 'SAVINGS' | 'CURRENT' | 'CARD';
   currency: string;
   status: 'ACTIVE' | 'CLOSED';
+  balance: number; // ✅ Added to match backend
 }
+
 
 export interface TransactionRef {
   txnRefId: number;
@@ -208,6 +210,14 @@ export interface PaymentInitiation {
   currency: string;
   status: 'CREATED' | 'AUTHORIZED' | 'REJECTED' | 'EXECUTED';
   createdDate: string;
+}
+
+export interface PaymentInitiationRequest {
+  tppAppId: number;
+  debtorAccountRef: string;
+  creditorAccountRef: string;
+  amount: number;
+  currency: string;
 }
 
 export interface FundsCheck {

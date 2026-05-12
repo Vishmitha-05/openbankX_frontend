@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { PaymentInitiation } from '../models/models';
+import { PaymentInitiation, PaymentInitiationRequest } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
@@ -11,11 +11,19 @@ export class PaymentService {
 
   constructor(private http: HttpClient) {}
 
-  initiatePayment(payment: Partial<PaymentInitiation>): Observable<PaymentInitiation> {
-    return this.http.post<PaymentInitiation>(`${this.apiUrl}/pisp/payments`, payment);
+  initiatePayment(
+    payload: PaymentInitiationRequest
+  ): Observable<PaymentInitiation> {
+    return this.http.post<PaymentInitiation>(
+      `${this.apiUrl}/pisp/payments`,
+      payload
+    );
   }
 
-  getPayments(): Observable<PaymentInitiation[]> {
-    return this.http.get<PaymentInitiation[]>(`${this.apiUrl}/pisp/payments`);
+  executePayment(paymentId: number): Observable<PaymentInitiation> {
+    return this.http.post<PaymentInitiation>(
+      `${this.apiUrl}/pisp/payments/${paymentId}/execute`,
+      {}
+    );
   }
 }

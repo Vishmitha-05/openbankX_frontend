@@ -4,35 +4,23 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Consent, ConsentEvent } from '../models/models';
 
-/**
- * ConsentService — Manages customer consents.
- *
- * Backend mappings:
- *   POST /api/v1/consents                 → Create consent
- *   GET  /api/v1/consents                 → List all consents
- *   GET  /api/v1/consents/{id}             → Get consent by ID
- *   PUT  /api/v1/consents/{id}/revoke      → Revoke consent
- *   PUT  /api/v1/consents/{id}/activate    → Activate consent after SCA
- *   GET  /api/v1/consents/user/{userId}    → Get consents by user
- */
 @Injectable({ providedIn: 'root' })
 export class ConsentService {
 
-  private apiUrl = environment.apiBaseUrl; // e.g. http://localhost:8080/api/v1
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) {}
 
   /**
-   * Create a consent
-   * Expiry date is calculated in the BACKEND
+   * ✅ Create a consent (correct payload shape)
    */
   createConsent(consent: {
-    user_id: number;
-    tpp_app_id: number;
+    user: { userId: number };
+    tppApp: { tppAppId: number };
     scopeJSON: string;
   }): Observable<Consent> {
     return this.http.post<Consent>(
-      `http://localhost:8081/api/v1/consents`, // Use full URL to avoid proxy issues
+      `${this.apiUrl}/consents`,
       consent
     );
   }
@@ -41,9 +29,7 @@ export class ConsentService {
    * Get all consents (admin / ops)
    */
   getConsents(): Observable<Consent[]> {
-    return this.http.get<Consent[]>(
-      `${this.apiUrl}/consents`
-    );
+    return this.http.get<Consent[]>(`${this.apiUrl}/consents`);
   }
 
   /**
@@ -59,9 +45,7 @@ export class ConsentService {
    * Get a single consent by ID
    */
   getConsentById(id: number): Observable<Consent> {
-    return this.http.get<Consent>(
-      `${this.apiUrl}/consents/${id}`
-    );
+    return this.http.get<Consent>(`${this.apiUrl}/consents/${id}`);
   }
 
   /**
@@ -85,9 +69,7 @@ export class ConsentService {
   }
 
   /**
-   * (Optional)
-   * Requires backend endpoint:
-   * GET /api/v1/consents/{id}/events
+   * Get consent events (optional)
    */
   getConsentEvents(consentId: number): Observable<ConsentEvent[]> {
     return this.http.get<ConsentEvent[]>(

@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AccountService } from '../../core/services/account.service';
-import { FundsService } from '../../core/services/funds.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConsentService } from '../../core/services/consent.service';
 import { AccountRef, Consent } from '../../core/models/models';
@@ -16,43 +15,76 @@ import { AccountRef, Consent } from '../../core/models/models';
   styleUrl: './funds-check.component.css'
 })
 export class FundsCheckComponent implements OnInit {
+
   accounts: AccountRef[] = [];
-  selectedAccountId: number | null = null;
+  selectedAccount: AccountRef | null = null;
   amount: number | null = null;
-  currency = 'GBP';
-  isChecking = false;
-  result: { status: string; message: string; icon: string; color: string } | null = null;
-  errorMessage = '';
-  hasFundsAccess = false;
+
+  appName = '';
+  tppAppId!: number;
+
   isCheckingPermission = true;
+  hasFundsAccess = false;
+
+  errorMessage = '';
+
+  result:
+    | {
+        sufficient: boolean;
+        balance: number;
+        shortage?: number;
+      }
+    | null = null;
 
   constructor(
+    private route: ActivatedRoute,
+    private router: Router,
     private accountService: AccountService,
-    private fundsService: FundsService,
     private authService: AuthService,
-    private consentService: ConsentService,
-    private router: Router
+    private consentService: ConsentService
   ) {}
 
   ngOnInit(): void {
     const userId = this.authService.getUserId();
+    this.tppAppId = Number(this.route.snapshot.queryParamMap.get('tppAppId'));
+
+    // ❌ Block direct access
+    if (!this.tppAppId) {
+      this.errorMessage = 'Funds Check must be accessed via a verified app.';
+      this.isCheckingPermission = false;
+      return;
+    }
 
     this.consentService.getConsentsByUser(userId).subscribe({
-      next: (consents) => {
-        const activeConsents = (consents || []).filter(c => c.status === 'ACTIVE');
-        this.hasFundsAccess = activeConsents.some(c => this.hasScope(c, 'funds:read'));
+      next: (consents: Consent[]) => {
+        const consent = consents.find(
+          c =>
+            c.status === 'ACTIVE' &&
+            c.tppApp?.tppAppId === this.tppAppId &&
+            this.hasScope(c, 'funds-confirmations')
+        );
+
+        if (!consent) {
+          this.errorMessage =
+            'You do not have permission to access Funds Check for this app.';
+          this.isCheckingPermission = false;
+          return;
+        }
+
+        // ✅ Valid verified app
+        this.appName = consent.tppApp.appName;
+        this.hasFundsAccess = true;
         this.isCheckingPermission = false;
 
-        if (this.hasFundsAccess) {
-          this.accountService.getAccounts(userId).subscribe({
-            next: (d) => { this.accounts = d || []; },
-            error: () => { this.errorMessage = 'Unable to load accounts.'; }
-          });
-        }
+        this.accountService.getAccounts(userId).subscribe({
+          next: accs => (this.accounts = accs || []),
+          error: () =>
+            (this.errorMessage = 'Unable to load accounts for funds check.')
+        });
       },
       error: () => {
+        this.errorMessage = 'Unable to validate consent.';
         this.isCheckingPermission = false;
-        this.errorMessage = 'Unable to check permissions.';
       }
     });
   }
@@ -61,7 +93,9 @@ export class FundsCheckComponent implements OnInit {
     try {
       const scopes: string[] = JSON.parse(consent.scopeJSON);
       return scopes.includes(scope);
-    } catch { return false; }
+    } catch {
+      return false;
+    }
   }
 
   goToBrowseApps(): void {
@@ -71,24 +105,25 @@ export class FundsCheckComponent implements OnInit {
   checkFunds(): void {
     this.result = null;
     this.errorMessage = '';
-    if (!this.selectedAccountId || !this.amount || this.amount <= 0) return;
-    this.isChecking = true;
-    this.fundsService.checkFunds({
-      accountRef: { accountId: this.selectedAccountId },
-      amount: this.amount,
-      currency: this.currency
-    }).subscribe({
-      next: (res) => {
-        this.result = res.result === 'SUFFICIENT'
-          ? { status: 'SUFFICIENT', message: 'Funds are available.', icon: 'fas fa-check-circle', color: '#10b981' }
-          : { status: 'INSUFFICIENT', message: 'Insufficient funds.', icon: 'fas fa-times-circle', color: '#ef4444' };
-        this.isChecking = false;
-      },
-      error: () => {
-        this.errorMessage = 'Funds check failed. Please ensure backend is running.';
-        this.isChecking = false;
-      }
-    });
+
+    if (!this.selectedAccount || !this.amount || this.amount <= 0) {
+      this.errorMessage = 'Please select an account and enter a valid amount.';
+      return;
+    }
+
+    const balance = this.selectedAccount.balance;
+
+    if (this.amount <= balance) {
+      this.result = {
+        sufficient: true,
+        balance
+      };
+    } else {
+      this.result = {
+        sufficient: false,
+        balance,
+        shortage: this.amount - balance
+      };
+    }
   }
 }
-
