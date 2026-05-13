@@ -15,35 +15,20 @@ import { Router, ActivatedRoute } from '@angular/router';
 
       <div class="page-header">
         <div>
-          <h1>
-            <i class="fas fa-wallet"></i> My Accounts
-          </h1>
+          <h1><i class="fas fa-wallet"></i> My Accounts</h1>
           <p class="page-subtitle" *ngIf="tppAppName">
             Shared with <strong>{{ tppAppName }}</strong>
           </p>
+          <p class="page-subtitle" *ngIf="!tppAppName">
+            Open this page through an app that has the <em>View accounts</em> permission
+          </p>
         </div>
-      </div>
-
-      <!-- NO CONSENT -->
-      <div class="glass-card"
-           *ngIf="!isLoading && !hasAccountAccess"
-           style="text-align:center; padding:40px;">
-        <i class="fas fa-lock"
-           style="font-size:2.5rem; color:#f59e0b;"></i>
-        <h3>No Active Consent</h3>
-        <p class="text-muted">
-          Grant access to a TPP app first.
-        </p>
-        <button class="btn btn-primary mt-12"
-                (click)="goToBrowseApps()">
-          Browse Apps
-        </button>
       </div>
 
       <!-- LOADING -->
       <div class="loading-container" *ngIf="isLoading">
         <div class="spinner"></div>
-        <span>Loading accounts...</span>
+        <span>Loading...</span>
       </div>
 
       <!-- ERROR -->
@@ -51,13 +36,91 @@ import { Router, ActivatedRoute } from '@angular/router';
         {{ errorMessage }}
       </div>
 
-      <!-- ACCOUNTS -->
-      <div *ngIf="!isLoading && hasAccountAccess">
+      <!-- ============================================================
+           DIRECT NAVIGATION (no tppAppId in URL)
+           Show only the app picker / guidance — never the raw accounts.
+           ============================================================ -->
+      <div *ngIf="!isLoading && !tppAppId && appsWithAccountAccess.length > 0"
+           class="glass-card">
+        <h3 class="mb-12"><i class="fas fa-hand-pointer"></i> Open through an app</h3>
+        <p class="text-muted mb-16">
+          You've granted account access to {{ appsWithAccountAccess.length }}
+          app{{ appsWithAccountAccess.length === 1 ? '' : 's' }}.
+          Pick one to view your accounts as that app would.
+        </p>
+        <div class="app-picker">
+          <button *ngFor="let c of appsWithAccountAccess"
+                  class="app-picker-item"
+                  (click)="openThroughApp(c)">
+            <div class="app-picker-icon"><i class="fas fa-cube"></i></div>
+            <div class="app-picker-meta">
+              <strong>{{ c.tppApp?.appName }}</strong>
+              <span class="text-sm text-muted">{{ c.tppApp?.tpp?.legalName || '' }}</span>
+            </div>
+            <i class="fas fa-chevron-right text-muted"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- NO ACTIVE CONSENT AT ALL -->
+      <div *ngIf="!isLoading && !tppAppId && appsWithAccountAccess.length === 0 && noConsentsAtAll"
+           class="glass-card no-consent-card">
+        <i class="fas fa-lock no-consent-icon"></i>
+        <h3>No active consents yet</h3>
+        <p class="text-muted">
+          You haven't granted any app access to your accounts. Go to <strong>My Apps</strong> to get started.
+        </p>
+        <button class="btn btn-primary mt-12" (click)="goToBrowseApps()">
+          <i class="fas fa-store"></i> Open My Apps
+        </button>
+      </div>
+
+      <!-- HAS CONSENTS BUT NONE WITH 'accounts' SCOPE -->
+      <div *ngIf="!isLoading && !tppAppId && appsWithAccountAccess.length === 0 && !noConsentsAtAll"
+           class="glass-card no-consent-card">
+        <i class="fas fa-lock no-consent-icon"></i>
+        <h3>No app has account access yet</h3>
+        <p class="text-muted">
+          None of your active consents include the <em>View accounts</em> permission.
+          Grant that permission to an app from <strong>My Apps</strong> first.
+        </p>
+        <button class="btn btn-primary mt-12" (click)="goToBrowseApps()">
+          <i class="fas fa-store"></i> Open My Apps
+        </button>
+      </div>
+
+      <!-- ============================================================
+           OPENED VIA AN APP, BUT THAT APP HAS NO accounts SCOPE
+           ============================================================ -->
+      <div *ngIf="!isLoading && tppAppId && !hasAccountAccess"
+           class="glass-card no-consent-card">
+        <i class="fas fa-lock no-consent-icon"></i>
+        <h3>This app doesn't have account access</h3>
+        <p class="text-muted">
+          Your consent for <strong>{{ tppAppName || 'this app' }}</strong> doesn't include the
+          <em>View accounts</em> permission.
+        </p>
+        <button class="btn btn-primary mt-12" (click)="goToBrowseApps()">
+          <i class="fas fa-store"></i> Open another app
+        </button>
+      </div>
+
+      <!-- ============================================================
+           ACCOUNTS — only when tppAppId is set AND consent has 'accounts'
+           ============================================================ -->
+      <div *ngIf="!isLoading && tppAppId && hasAccountAccess">
         <div class="grid-2 mb-20">
           <div *ngFor="let acc of accounts"
                class="glass-card account-card"
+               [class.selected-account]="selectedAccount?.accountId === acc.accountId"
                (click)="loadTransactions(acc)">
-            <h4 class="font-mono">{{ acc.accountNumberMasked }}</h4>
+            <div class="flex items-center justify-between">
+              <h4 class="font-mono">{{ acc.accountNumberMasked }}</h4>
+              <span class="badge"
+                    [ngClass]="acc.status === 'ACTIVE' ? 'badge-active' : 'badge-locked'">
+                {{ acc.status }}
+              </span>
+            </div>
             <div class="mt-4 text-sm text-muted">
               {{ acc.type }} • {{ acc.currency }}
             </div>
@@ -70,16 +133,22 @@ import { Router, ActivatedRoute } from '@angular/router';
 
         <!-- TRANSACTIONS -->
         <div class="glass-card" *ngIf="selectedAccount">
-          <h3>
-            Transactions — {{ selectedAccount.accountNumberMasked }}
-          </h3>
+          <div class="flex items-center justify-between mb-12">
+            <h3>
+              <i class="fas fa-receipt"></i>
+              Transaction history — {{ selectedAccount.accountNumberMasked }}
+            </h3>
+            <button class="btn btn-light btn-sm" (click)="refreshTransactions()"
+                    [disabled]="txnLoading">
+              <i class="fas fa-sync" [class.fa-spin]="txnLoading"></i> Refresh
+            </button>
+          </div>
 
           <div *ngIf="txnLoading" class="loading-container">
             <div class="spinner"></div>
           </div>
 
-          <table class="data-table"
-                 *ngIf="!txnLoading && transactions.length > 0">
+          <table class="data-table" *ngIf="!txnLoading && transactions.length > 0">
             <thead>
               <tr>
                 <th>Date</th>
@@ -90,15 +159,28 @@ import { Router, ActivatedRoute } from '@angular/router';
             </thead>
             <tbody>
               <tr *ngFor="let txn of transactions">
-                <td>{{ txn.txnDate | date:'mediumDate' }}</td>
-                <td>{{ txn.narrative }}</td>
-                <td>{{ txn.txnType }}</td>
-                <td class="text-right">
-                  {{ txn.amount | number:'1.2-2' }}
+                <td class="text-sm">{{ txn.txnDate | date:'medium' }}</td>
+                <td>{{ txn.narrative || '—' }}</td>
+                <td>
+                  <span class="badge"
+                        [ngClass]="txn.txnType === 'CREDIT' ? 'badge-active' : 'badge-revoked'">
+                    {{ txn.txnType }}
+                  </span>
+                </td>
+                <td class="text-right font-mono"
+                    [class.text-success]="txn.txnType === 'CREDIT'"
+                    [class.text-error]="txn.txnType === 'DEBIT'">
+                  {{ txn.txnType === 'DEBIT' ? '-' : '+' }}
+                  {{ selectedAccount.currency }} {{ txn.amount | number:'1.2-2' }}
                 </td>
               </tr>
             </tbody>
           </table>
+
+          <div class="empty-state" *ngIf="!txnLoading && transactions.length === 0">
+            <i class="fas fa-receipt"></i>
+            <p>No transactions on this account yet.</p>
+          </div>
         </div>
       </div>
 
@@ -117,10 +199,13 @@ export class MyAccountsComponent implements OnInit {
   errorMessage = '';
 
   hasAccountAccess = false;
-  hasPaymentAccess = false;
-
   tppAppName = '';
-  tppAppId!: number;
+  tppAppId: number | null = null;
+
+  /** Apps the user has consented to that include 'accounts'. */
+  appsWithAccountAccess: Consent[] = [];
+  /** True only if the user has no ACTIVE consents at all. */
+  noConsentsAtAll = false;
 
   constructor(
     private accountService: AccountService,
@@ -133,30 +218,31 @@ export class MyAccountsComponent implements OnInit {
 
   ngOnInit(): void {
     const userId = this.authService.getUserId();
-    this.tppAppId = Number(this.route.snapshot.queryParamMap.get('tppAppId'));
+    const qpId = Number(this.route.snapshot.queryParamMap.get('tppAppId'));
+    this.tppAppId = qpId > 0 ? qpId : null;
 
     this.consentService.getConsentsByUser(userId).subscribe({
       next: (consents: Consent[]) => {
+        const active = (consents || []).filter(c => c.status === 'ACTIVE');
+        this.noConsentsAtAll = active.length === 0;
+        this.appsWithAccountAccess = active.filter(c => this.hasScope(c, 'accounts'));
 
-        const consent = consents.find(
-          c => c.status === 'ACTIVE' &&
-               c.tppApp?.tppAppId === this.tppAppId
-        );
-
-        if (!consent) {
-          this.isLoading = false;
-          return;
+        if (this.tppAppId) {
+          // Came through an app — only show accounts if THAT app has the scope.
+          const consent = active.find(c => c.tppApp?.tppAppId === this.tppAppId);
+          if (consent) {
+            this.tppAppName = consent.tppApp.appName;
+            this.hasAccountAccess = this.hasScope(consent, 'accounts');
+            if (this.hasAccountAccess) {
+              this.loadAccounts(userId);
+              return;
+            }
+          }
         }
 
-        this.tppAppName = consent.tppApp.appName;
-        this.hasAccountAccess = this.hasScope(consent, 'accounts');
-        this.hasPaymentAccess = this.hasScope(consent, 'payments');
-
-        if (this.hasAccountAccess) {
-          this.loadAccounts(userId);
-        } else {
-          this.isLoading = false;
-        }
+        // Direct nav → show picker / guidance only, never the raw account list.
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Unable to check consent permissions.';
@@ -169,17 +255,25 @@ export class MyAccountsComponent implements OnInit {
     try {
       const scopes: string[] = JSON.parse(consent.scopeJSON);
       return scopes.includes(scope);
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 
   private loadAccounts(userId: number): void {
-    this.accountService.getAccounts(userId).subscribe({
+    this.accountService.getAccounts(userId, this.tppAppId).subscribe({
       next: accs => {
         this.accounts = accs || [];
         this.isLoading = false;
-        this.cdr.detectChanges();
+
+        // Auto-select an account so transactions load without an extra click.
+        // If the payment receipt navigated here with ?focus=<id>, prefer that.
+        const focusId = Number(this.route.snapshot.queryParamMap.get('focus'));
+        const focused = focusId > 0 ? this.accounts.find(a => a.accountId === focusId) : undefined;
+        const target = focused || this.accounts[0];
+        if (target) {
+          this.loadTransactions(target);
+        } else {
+          this.cdr.detectChanges();
+        }
       },
       error: () => {
         this.errorMessage = 'Unable to load accounts.';
@@ -188,19 +282,23 @@ export class MyAccountsComponent implements OnInit {
     });
   }
 
+  refreshTransactions(): void {
+    if (this.selectedAccount) this.loadTransactions(this.selectedAccount);
+  }
+
   loadTransactions(acc: AccountRef): void {
     this.selectedAccount = acc;
     this.txnLoading = true;
-
-    this.accountService.getTransactions(acc.accountId).subscribe({
-      next: txns => {
-        this.transactions = txns || [];
-        this.txnLoading = false;
-      },
-      error: () => {
-        this.txnLoading = false;
-      }
+    this.accountService.getTransactions(acc.accountId, this.tppAppId).subscribe({
+      next: txns => { this.transactions = txns || []; this.txnLoading = false; this.cdr.detectChanges(); },
+      error: () => { this.txnLoading = false; }
     });
+  }
+
+  openThroughApp(consent: Consent): void {
+    this.router.navigate(['/customer/accounts'], {
+      queryParams: { tppAppId: consent.tppApp?.tppAppId }
+    }).then(() => window.location.reload());
   }
 
   goToBrowseApps(): void {

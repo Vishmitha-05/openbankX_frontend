@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/error-page/error-page.component.css"],
+  "sourcesContent": [".error-wrapper {\r\n  min-height: 100vh; display: flex; align-items: center; justify-content: center;\r\n  background: linear-gradient(135deg, #e8ecff 0%, #f0f4ff 100%);\r\n}\r\n.error-card {\r\n  text-align: center; padding: 60px 40px; max-width: 480px;\r\n  background: rgba(255,255,255,0.85); border-radius: 20px;\r\n  box-shadow: 0 10px 40px rgba(0,0,0,0.1); backdrop-filter: blur(10px);\r\n}\r\n.error-code { font-size: 6rem; font-weight: 800; line-height: 1; margin-bottom: 8px; }\r\n.error-card h2 { margin: 0 0 12px; font-size: 1.5rem; }\r\n.error-desc { color: #6b7280; margin: 0 0 30px; line-height: 1.6; }\r\n.error-icon { font-size: 3rem; margin-bottom: 30px; }\r\n"],
+  "mappings": ";AAAA,CAAC;AACC,cAAY;AAAO,WAAS;AAAM,eAAa;AAAQ,mBAAiB;AACxE;AAAA,IAAY;AAAA,MAAgB,MAAhB;AAAA,MAAwB,QAAQ,EAAhC;AAAA,MAAoC,QAAQ;AAC1D;AACA,CAAC;AACC,cAAY;AAAQ,WAAS,KAAK;AAAM,aAAW;AACnD,cAAY,KAAK,GAAG,EAAC,GAAG,EAAC,GAAG,EAAC;AAAO,iBAAe;AACnD,cAAY,EAAE,KAAK,KAAK,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAM,2BAAiB,KAAK;AAAtB,mBAAiB,KAAK;AACjE;AACA,CAAC;AAAa,aAAW;AAAM,eAAa;AAAK,eAAa;AAAG,iBAAe;AAAK;AACrF,CANC,WAMW;AAAK,UAAQ,EAAE,EAAE;AAAM,aAAW;AAAQ;AACtD,CAAC;AAAa,SAAO;AAAS,UAAQ,EAAE,EAAE;AAAM,eAAa;AAAK;AAClE,CAAC;AAAa,aAAW;AAAM,iBAAe;AAAM;",
+  "names": []
+}

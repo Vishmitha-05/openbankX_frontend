@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/operations-portal/latency-charts/latency-charts.component.css"],
+  "sourcesContent": [".latency-value{font-size:2rem;font-weight:800}\r\n.gauge-bar{height:8px;background:rgba(0,0,0,0.06);border-radius:4px;overflow:hidden}\r\n.gauge-fill{height:100%;border-radius:4px;transition:width 1s ease}\r\n.endpoint-bars{display:flex;flex-direction:column;gap:10px}\r\n.bar-row{display:grid;grid-template-columns:160px 1fr 60px;align-items:center;gap:12px}\r\n.bar-track{height:20px;background:rgba(0,0,0,0.04);border-radius:4px;overflow:hidden}\r\n.bar-fill{height:100%;border-radius:4px;transition:width 0.8s ease}\r\n"],
+  "mappings": ";AAAA,CAAC;AAAc,aAAU;AAAK,eAAY;AAAG;AAC7C,CAAC;AAAU,UAAO;AAAI,cAAW,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAM,iBAAc;AAAI,YAAS;AAAM;AACnF,CAAC;AAAW,UAAO;AAAK,iBAAc;AAAI,cAAW,MAAM,GAAG;AAAI;AAClE,CAAC;AAAc,WAAQ;AAAK,kBAAe;AAAO,OAAI;AAAI;AAC1D,CAAC;AAAQ,WAAQ;AAAK,yBAAsB,MAAM,IAAI;AAAK,eAAY;AAAO,OAAI;AAAI;AACtF,CAAC;AAAU,UAAO;AAAK,cAAW,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAM,iBAAc;AAAI,YAAS;AAAM;AACpF,CAAC;AAAS,UAAO;AAAK,iBAAc;AAAI,cAAW,MAAM,KAAK;AAAI;",
+  "names": []
+}

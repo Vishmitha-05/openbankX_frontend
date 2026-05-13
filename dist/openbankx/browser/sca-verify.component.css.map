@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/customer-portal/sca-verify/sca-verify.component.css"],
+  "sourcesContent": [".sca-icon-wrapper { text-align:center;margin-bottom:24px; }\r\n.sca-icon { width:64px;height:64px;margin:0 auto;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#fff;box-shadow:0 8px 30px rgba(102,126,234,0.3); }\r\n.otp-input { text-align:center;font-size:1.5rem;letter-spacing:12px;font-weight:700; }\r\n"],
+  "mappings": ";AAAA,CAAC;AAAmB,cAAW;AAAO,iBAAc;AAAM;AAC1D,CAAC;AAAW,SAAM;AAAK,UAAO;AAAK,UAAO,EAAE;AAAK;AAAA,IAAW;AAAA,MAAgB,MAAhB;AAAA,MAAuB,OAAvB;AAAA,MAA+B;AAAS,iBAAc;AAAI,WAAQ;AAAK,eAAY;AAAO,mBAAgB;AAAO,aAAU;AAAO,SAAM;AAAK,cAAW,EAAE,IAAI,KAAK,KAAK,GAAG,EAAC,GAAG,EAAC,GAAG,EAAC;AAAM;AACtP,CAAC;AAAY,cAAW;AAAO,aAAU;AAAO,kBAAe;AAAK,eAAY;AAAK;",
+  "names": []
+}

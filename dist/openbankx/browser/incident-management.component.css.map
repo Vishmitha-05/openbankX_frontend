@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/operations-portal/incident-management/incident-management.component.css"],
+  "sourcesContent": [".inc-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem}\r\n"],
+  "mappings": ";AAAA,CAAC;AAAS,SAAM;AAAK,UAAO;AAAK,iBAAc;AAAK,WAAQ;AAAK,eAAY;AAAO,mBAAgB;AAAO,SAAM;AAAK,aAAU;AAAI;",
+  "names": []
+}

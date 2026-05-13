@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/customer-portal/consent-detail/consent-detail.component.css"],
+  "sourcesContent": [".detail-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.04); }\r\n.detail-label { color:var(--text-secondary); font-size:0.85rem; }\r\n"],
+  "mappings": ";AAAA,CAAC;AAAa,WAAQ;AAAM,mBAAgB;AAAe,WAAQ,KAAK;AAAG,iBAAc,IAAI,MAAM,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAO;AACrH,CAAC;AAAe,SAAM,IAAI;AAAmB,aAAU;AAAS;",
+  "names": []
+}

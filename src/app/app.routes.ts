@@ -14,6 +14,12 @@ export const routes: Routes = [
     loadComponent: () => import('./register/register.component').then(m => m.RegisterComponent)
   },
 
+  // Forgot password — public route
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+  },
+
   // ========== Portal 1: Developer (TPP) ==========
   {
     path: 'developer',
@@ -43,7 +49,9 @@ export const routes: Routes = [
       { path: 'apps', loadComponent: () => import('./customer-portal/app-browser/app-browser.component').then(m => m.AppBrowserComponent) },
       { path: 'consents', loadComponent: () => import('./customer-portal/my-consents/my-consents.component').then(m => m.MyConsentsComponent) },
       { path: 'consents/:id', loadComponent: () => import('./customer-portal/consent-detail/consent-detail.component').then(m => m.ConsentDetailComponent) },
-      { path: 'consent-review', loadComponent: () => import('./customer-portal/consent-review/consent-review.component').then(m => m.ConsentReviewComponent) },
+      // Review-consent functionality is now folded into the My Consents page.
+      // Legacy path redirects so existing links don't 404.
+      { path: 'consent-review', redirectTo: 'consents', pathMatch: 'full' },
       { path: 'sca', loadComponent: () => import('./customer-portal/sca-verify/sca-verify.component').then(m => m.ScaVerifyComponent) },
       { path: 'accounts', loadComponent: () => import('./customer-portal/my-accounts/my-accounts.component').then(m => m.MyAccountsComponent) },
       { path: 'payment-initiate', loadComponent: () => import('./customer-portal/initiate-payment/initiate-payment.component').then(m => m.InitiatePaymentComponent) },

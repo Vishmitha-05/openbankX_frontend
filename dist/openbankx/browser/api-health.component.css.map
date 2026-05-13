@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/operations-portal/api-health/api-health.component.css"],
+  "sourcesContent": [".gauge-bar{height:10px;background:rgba(0,0,0,0.06);border-radius:5px;overflow:hidden}\r\n.gauge-fill{height:100%;border-radius:5px;transition:width 1s cubic-bezier(0.4,0,0.2,1)}\r\n"],
+  "mappings": ";AAAA,CAAC;AAAU,UAAO;AAAK,cAAW,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAM,iBAAc;AAAI,YAAS;AAAM;AACpF,CAAC;AAAW,UAAO;AAAK,iBAAc;AAAI,cAAW,MAAM,GAAG,aAAa,GAAG,EAAC,CAAC,EAAC,GAAG,EAAC;AAAE;",
+  "names": []
+}

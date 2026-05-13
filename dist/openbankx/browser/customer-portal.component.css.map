@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/customer-portal/customer-portal.component.css"],
+  "sourcesContent": [".portal-layout {\n  display: flex;\n  min-height: 100vh;\n}\n.portal-main {\n  flex: 1;\n  margin-left: 240px;\n  display: flex;\n  flex-direction: column;\n  min-width: 0;\n  transition: margin-left 0.2s ease;\n}\n.portal-content {\n  flex: 1;\n  overflow-y: auto;\n  background-color: var(--bg-primary);\n}\n\n@media (max-width: 992px) {\n  .portal-main {\n    margin-left: 72px;\n  }\n}\n"],
+  "mappings": ";AAAA,CAAC;AACC,WAAS;AACT,cAAY;AACd;AACA,CAAC;AACC,QAAM;AACN,eAAa;AACb,WAAS;AACT,kBAAgB;AAChB,aAAW;AACX,cAAY,YAAY,KAAK;AAC/B;AACA,CAAC;AACC,QAAM;AACN,cAAY;AACZ,oBAAkB,IAAI;AACxB;AAEA,QAAO,WAAY;AACjB,GAfD;AAgBG,iBAAa;AACf;AACF;",
+  "names": []
+}

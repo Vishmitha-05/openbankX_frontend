@@ -6,7 +6,9 @@ import { AccountService } from '../../core/services/account.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConsentService } from '../../core/services/consent.service';
-import { AccountRef, Consent } from '../../core/models/models';
+import { AccountRef, Consent, PaymentInitiation } from '../../core/models/models';
+
+type PayStep = 'idle' | 'initiating' | 'verifying' | 'executing' | 'done' | 'failed';
 
 @Component({
   selector: 'app-initiate-payment',
@@ -24,15 +26,26 @@ export class InitiatePaymentComponent implements OnInit {
   amount: number | null = null;
   narrative = '';
 
-  isSubmitting = false;
   successMessage = '';
   errorMessage = '';
 
   isCheckingPermission = true;
   hasPaymentAccess = false;
 
-  tppAppId!: number;
+  eligibleApps: Consent[] = [];
+  noConsentsAtAll = false;
+
+  tppAppId: number | null = null;
   appName = '';
+
+  /** Multi-step payment state, drives the inline progress UI. */
+  step: PayStep = 'idle';
+  /** The created PaymentInitiation (after backend save). */
+  paymentRecord: PaymentInitiation | null = null;
+  /** Snapshot of the source account *before* the payment, so we can show
+   *  both the previous and new balance after execution. */
+  preBalance: number | null = null;
+  postBalance: number | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -45,42 +58,34 @@ export class InitiatePaymentComponent implements OnInit {
 
   ngOnInit(): void {
     const userId = this.authService.getUserId();
-    this.tppAppId = Number(this.route.snapshot.queryParamMap.get('tppAppId'));
-
-    // ❌ Block direct access
-    if (!this.tppAppId) {
-      this.errorMessage = 'Payment initiation must be started via a verified app.';
-      this.isCheckingPermission = false;
-      return;
-    }
+    const qpId = Number(this.route.snapshot.queryParamMap.get('tppAppId'));
+    this.tppAppId = qpId > 0 ? qpId : null;
 
     this.consentService.getConsentsByUser(userId).subscribe({
       next: (consents: Consent[]) => {
+        const active = (consents || []).filter(c => c.status === 'ACTIVE');
+        this.noConsentsAtAll = active.length === 0;
+        this.eligibleApps = active.filter(c => this.hasScope(c, 'payments'));
 
-        const consent = consents.find(
-          c =>
-            c.status === 'ACTIVE' &&
-            c.tppApp?.tppAppId === this.tppAppId &&
-            this.hasScope(c, 'payments')
-        );
-
-        if (!consent) {
-          this.errorMessage =
-            'You do not have permission to initiate payments for this app.';
-          this.isCheckingPermission = false;
-          return;
+        if (this.tppAppId) {
+          const consent = active.find(c => c.tppApp?.tppAppId === this.tppAppId);
+          if (consent) {
+            this.appName = consent.tppApp.appName;
+            this.hasPaymentAccess = this.hasScope(consent, 'payments');
+            if (this.hasPaymentAccess) {
+              this.accountService.getAccounts(userId, this.tppAppId).subscribe({
+                next: accs => { this.accounts = accs || []; this.isCheckingPermission = false; },
+                error: () => {
+                  this.errorMessage = 'Unable to load accounts.';
+                  this.isCheckingPermission = false;
+                }
+              });
+              return;
+            }
+          }
         }
 
-        // ✅ Verified app and valid consent
-        this.appName = consent.tppApp.appName;
-        this.hasPaymentAccess = true;
         this.isCheckingPermission = false;
-
-        this.accountService.getAccounts(userId).subscribe({
-          next: accs => this.accounts = accs || [],
-          error: () =>
-            this.errorMessage = 'Unable to load accounts.'
-        });
       },
       error: () => {
         this.errorMessage = 'Unable to validate consent.';
@@ -93,50 +98,140 @@ export class InitiatePaymentComponent implements OnInit {
     try {
       const scopes: string[] = JSON.parse(consent.scopeJSON);
       return scopes.includes(scope);
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 
+  openThroughApp(consent: Consent): void {
+    this.router.navigate(['/customer/payment-initiate'], {
+      queryParams: { tppAppId: consent.tppApp?.tppAppId }
+    }).then(() => window.location.reload());
+  }
+
+  goToBrowseApps(): void {
+    this.router.navigate(['/customer/apps']);
+  }
+
+  /* ---------------- Selected source account ---------------- */
+
+  get selectedAccount(): AccountRef | undefined {
+    return this.accounts.find(a => a.accountId === this.selectedAccountId!);
+  }
+
+  get currency(): string {
+    return this.selectedAccount?.currency || 'GBP';
+  }
+
+  /* ---------------- Payment flow ---------------- */
+
+  /** Step 1 — initiate */
   submitPayment(): void {
-  this.errorMessage = '';
-  this.successMessage = '';
+    this.errorMessage = '';
+    this.successMessage = '';
 
-  if (!this.selectedAccountId || !this.payeeAccount || !this.amount || this.amount <= 0) {
-    this.errorMessage = 'Please fill all required fields correctly.';
-    return;
+    if (!this.selectedAccountId || !this.payeeAccount || !this.amount || this.amount <= 0) {
+      this.errorMessage = 'Please fill all required fields correctly.';
+      return;
+    }
+    if (!this.tppAppId) {
+      this.errorMessage = 'Open this page through an app to initiate a payment.';
+      return;
+    }
+    if (this.selectedAccount && this.amount > this.selectedAccount.balance) {
+      this.errorMessage = `Insufficient funds. Available balance is ${this.currency} ${this.selectedAccount.balance.toFixed(2)}.`;
+      return;
+    }
+
+    this.preBalance = this.selectedAccount ? this.selectedAccount.balance : null;
+    this.step = 'initiating';
+
+    this.paymentService.initiatePayment({
+      tppAppId: this.tppAppId,
+      debtorAccountRef: this.selectedAccountId.toString(),
+      creditorAccountRef: this.payeeAccount,
+      amount: this.amount,
+      currency: this.currency
+    }).subscribe({
+      next: (payment) => {
+        this.paymentRecord = payment;
+        this.step = 'verifying';
+        // Small delay so the user can see the "verifying" stage.
+        setTimeout(() => this.executeStep(payment.paymentId), 700);
+      },
+      error: (err) => {
+        this.step = 'failed';
+        this.errorMessage = this.describeError(err, 'Could not create the payment instruction');
+      }
+    });
   }
 
-  this.isSubmitting = true;
+  /** Step 2 — execute */
+  private executeStep(paymentId: number): void {
+    this.step = 'executing';
 
-  this.paymentService.initiatePayment({
-    tppAppId: this.tppAppId,
-    debtorAccountRef: this.selectedAccountId.toString(),
-    creditorAccountRef: this.payeeAccount,
-    amount: this.amount,
-    currency: 'GBP'
-  }).subscribe({
-    next: (payment) => {
-      // ✅ Execute payment
-      this.paymentService.executePayment(payment.paymentId).subscribe({
-        next: () => {
-          this.successMessage = 'Payment executed successfully.';
-          this.isSubmitting = false;
-          setTimeout(() => {
-            this.router.navigate(['/customer/accounts'], {
-              queryParams: { tppAppId: this.tppAppId }
-            });
-          }, 1500);
-        },
-        error: () => {
-          this.errorMessage = 'Payment execution failed.';
-          this.isSubmitting = false;
+    this.paymentService.executePayment(paymentId, this.tppAppId).subscribe({
+      next: (payment) => {
+        this.paymentRecord = payment;
+        if ((payment.status as any) === 'REJECTED') {
+          this.step = 'failed';
+          this.errorMessage =
+            'Payment rejected by the bank — most likely insufficient funds on the source account.';
+          return;
         }
-      });
-    },
-    error: () => {
-      this.errorMessage = 'Payment initiation failed.';
-      this.isSubmitting = false;
+        // Refresh accounts so we can show the new balance.
+        const userId = this.authService.getUserId();
+        this.accountService.getAccounts(userId, this.tppAppId).subscribe({
+          next: accs => {
+            this.accounts = accs || [];
+            this.postBalance = this.accounts.find(a => a.accountId === this.selectedAccountId!)?.balance ?? null;
+            this.step = 'done';
+            this.successMessage = `Payment of ${this.currency} ${this.amount?.toFixed(2)} executed successfully.`;
+          },
+          error: () => {
+            this.step = 'done';
+            this.successMessage = `Payment of ${this.currency} ${this.amount?.toFixed(2)} executed successfully.`;
+          }
+        });
+      },
+      error: (err) => {
+        this.step = 'failed';
+        this.errorMessage = this.describeError(err, 'The bank could not execute the transfer');
+      }
+    });
+  }
+
+  /** Turn an HTTP / RxJS timeout error into something human-readable. */
+  private describeError(err: any, fallback: string): string {
+    if (err?.name === 'TimeoutError') {
+      return 'The bank did not respond within 20 seconds. Check your network connection and try again — or contact support if it keeps failing.';
     }
-  });
-}}
+    if (err?.status === 0) return 'Cannot reach the bank service. Make sure the backend is running on port 8081.';
+    if (err?.status === 401) return 'Your session has expired. Please sign in again.';
+    if (err?.status === 403) return 'You do not have permission to initiate this payment.';
+    const serverMsg = err?.error?.message || err?.error?.error;
+    return serverMsg || `${fallback} (HTTP ${err?.status || '?'}).`;
+  }
+
+  /* ---------------- After completion ---------------- */
+
+  viewTransactions(): void {
+    this.router.navigate(['/customer/accounts'], {
+      queryParams: { tppAppId: this.tppAppId, focus: this.selectedAccountId }
+    });
+  }
+
+  newPayment(): void {
+    this.payeeAccount = '';
+    this.amount = null;
+    this.narrative = '';
+    this.paymentRecord = null;
+    this.preBalance = null;
+    this.postBalance = null;
+    this.successMessage = '';
+    this.errorMessage = '';
+    this.step = 'idle';
+  }
+
+  cancel(): void {
+    this.router.navigate(['/customer/consents']);
+  }
+}

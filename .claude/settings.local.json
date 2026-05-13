@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx ng *)",
+      "Bash(ls \"/c/Users/2478956/OneDrive - Cognizant/Desktop/OpenBankX_Project/frontend_backend/OpenBankX_Backend 1\" 2>&1)",
+      "Read(//c/Users/2478956/OneDrive - Cognizant/Desktop/OpenBankX_Project/frontend_backend/OpenBankX_Backend 1/**)",
+      "Bash(./mvnw.cmd -q -DskipTests compile)",
+      "PowerShell($resolved = \\(Get-Item 'C:\\\\Program Files\\\\Common Files\\\\Oracle\\\\Java\\\\javapath\\\\java.exe'\\).Target; $resolved)",
+      "PowerShell($real = \\(Get-Item 'C:\\\\Program Files\\\\Common Files\\\\Oracle\\\\Java\\\\javapath_target_347698609\\\\java.exe'\\).Target; $real)"
+    ]
+  }
+}

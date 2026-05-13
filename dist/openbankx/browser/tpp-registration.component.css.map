@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/developer-portal/tpp-registration/tpp-registration.component.css"],
+  "sourcesContent": [".max-w-600 { max-width: 600px; margin: 0 auto; }\r\n"],
+  "mappings": ";AAAA,CAAC;AAAY,aAAW;AAAO,UAAQ,EAAE;AAAM;",
+  "names": []
+}

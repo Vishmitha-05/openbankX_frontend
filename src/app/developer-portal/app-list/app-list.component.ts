@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TppService } from '../../core/services/tpp.service';
 import { ProductService } from '../../core/services/product.service';
+import { AuthService } from '../../core/services/auth.service';
 import { TPPApp, TPPSubscription } from '../../core/models/models';
 
 /**
@@ -118,17 +119,21 @@ export class AppListComponent implements OnInit {
   errorMessage = '';
 
   private colors = [
-    'linear-gradient(135deg, #667eea, #764ba2)',
-    'linear-gradient(135deg, #10b981, #059669)',
-    'linear-gradient(135deg, #f59e0b, #d97706)',
-    'linear-gradient(135deg, #ef4444, #dc2626)',
-    'linear-gradient(135deg, #06b6d4, #0891b2)'
+    '#0a2540',
+    '#1e40af',
+    '#c79a2a',
+    '#0e7490',
+    '#16a34a'
   ];
 
-  constructor(private tppService: TppService, private productService: ProductService) {}
+  constructor(
+    private tppService: TppService,
+    private productService: ProductService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.tppService.getApps().subscribe({
+    this.tppService.getMyApps(this.authService.getEmail()).subscribe({
       next: (data) => {
         this.apps = data || [];
         this.isLoading = false;

@@ -59,12 +59,25 @@ export class ConsentService {
   }
 
   /**
-   * Activate consent after SCA completion
+   * Update the scope list of an existing consent (used by the customer's
+   * My Consents page to add or withdraw individual permissions).
+   * Submitting an empty array effectively revokes the consent.
    */
-  activateAfterSca(id: number): Observable<Consent> {
+  updateScopes(id: number, scopes: string[]): Observable<Consent> {
+    return this.http.put<Consent>(
+      `${this.apiUrl}/consents/${id}/scopes`,
+      { scopeJSON: JSON.stringify(scopes) }
+    );
+  }
+
+  /**
+   * Activate consent after SCA completion. The chosen SCA method is
+   * recorded server-side in sca_event for audit purposes.
+   */
+  activateAfterSca(id: number, method: string = 'OTP'): Observable<Consent> {
     return this.http.put<Consent>(
       `${this.apiUrl}/consents/${id}/activate`,
-      {}
+      { method }
     );
   }
 

@@ -1,14 +1,21 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { FundsCheck } from '../models/models';
 
+const FUNDS_REQUEST_TIMEOUT_MS = 20000;
+
+export interface FundsCheckRequest {
+  tppAppId: number;
+  accountId: number;
+  amount: number;
+  currency?: string;
+}
+
 /**
  * FundsService — CBPII (Funds Confirmation) APIs.
- *
- * Maps to:
- *   POST /cbpii/funds-check → Check funds availability
+ * POST /cbpii/funds-check
  */
 @Injectable({ providedIn: 'root' })
 export class FundsService {
@@ -17,7 +24,21 @@ export class FundsService {
 
   constructor(private http: HttpClient) {}
 
-  checkFunds(data: any): Observable<FundsCheck> {
-    return this.http.post<FundsCheck>(`${this.apiUrl}/cbpii/funds-check`, data);
+  /**
+   * Run a funds-confirmation against the given account. The tppAppId is sent
+   * both inside the JSON (so it's persisted on the row) and as an
+   * X-TPP-App-Id header (so api_log can attribute the call).
+   */
+  checkFunds(req: FundsCheckRequest): Observable<FundsCheck> {
+    const body = {
+      tppApp:    { tppAppId: req.tppAppId },
+      accountRef:{ accountId: req.accountId },
+      amount:    req.amount,
+      currency:  req.currency || 'GBP'
+    };
+    const headers = new HttpHeaders({ 'X-TPP-App-Id': String(req.tppAppId) });
+    return this.http
+      .post<FundsCheck>(`${this.apiUrl}/cbpii/funds-check`, body, { headers })
+      .pipe(timeout(FUNDS_REQUEST_TIMEOUT_MS));
   }
 }

@@ -24,7 +24,7 @@ import { AuthService } from '../../core/services/auth.service';
         <div class="logo-icon">
           <i class="fas fa-university"></i>
         </div>
-        <span class="logo-text" *ngIf="!isCollapsed">OpenBankX</span>
+        <span class="logo-text" *ngIf="!isCollapsed">OpenBank<span class="accent">X</span></span>
         <button class="collapse-btn" (click)="toggleCollapse()">
           <i [ngClass]="isCollapsed ? 'fas fa-chevron-right' : 'fas fa-chevron-left'"></i>
         </button>
@@ -126,13 +126,12 @@ export class SidebarComponent {
   ];
 
   customerMenu = [
-    { label: 'Browse Apps',    route: '/customer/apps',              icon: 'fas fa-store' },
+    { label: 'My Apps',        route: '/customer/apps',              icon: 'fas fa-store' },
     { label: 'My Consents',    route: '/customer/consents',          icon: 'fas fa-handshake' },
     { label: 'My Accounts',    route: '/customer/accounts',          icon: 'fas fa-wallet' },
     { label: 'Payments',       route: '/customer/payment-initiate',  icon: 'fas fa-paper-plane' },
     { label: 'Funds Check',    route: '/customer/funds-check',       icon: 'fas fa-search-dollar' },
-    { label: 'Review Consent', route: '/customer/consent-review',    icon: 'fas fa-clipboard-check' },
-    { label: 'SCA Verify',     route: '/customer/sca',              icon: 'fas fa-shield-alt' }
+    { label: 'SCA Verify',     route: '/customer/sca',               icon: 'fas fa-shield-alt' }
   ];
 
   opsMenu = [

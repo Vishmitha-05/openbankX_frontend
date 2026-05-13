@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/developer-portal/app-registration/app-registration.component.css"],
+  "sourcesContent": [".scope-checkboxes { display: flex; flex-wrap: wrap; gap: 8px; }\r\n.scope-check-item {\r\n  display: flex; align-items: center; gap: 6px; cursor: pointer;\r\n}\r\n.scope-check-item input[type=\"checkbox\"] {\r\n  accent-color: #667eea;\r\n}\r\n.invalid { border-color: var(--status-revoked) !important; }\r\n"],
+  "mappings": ";AAAA,CAAC;AAAmB,WAAS;AAAM,aAAW;AAAM,OAAK;AAAK;AAC9D,CAAC;AACC,WAAS;AAAM,eAAa;AAAQ,OAAK;AAAK,UAAQ;AACxD;AACA,CAHC,iBAGiB,KAAK,CAAC;AACtB,gBAAc;AAChB;AACA,CAAC;AAAU,gBAAc,IAAI;AAA8B;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/developer-portal/keys-upload/keys-upload.component.css"],
+  "sourcesContent": ["/* Keys upload CSS */\r\n.font-mono {\r\n  font-family: 'Courier New', Courier, monospace;\r\n}\r\n"],
+  "mappings": ";AACA,CAAC;AACC;AAAA,IAAa,aAAa;AAAA,IAAE,OAAO;AAAA,IAAE;AACvC;",
+  "names": []
+}

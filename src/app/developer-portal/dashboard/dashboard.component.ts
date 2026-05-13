@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TppService } from '../../core/services/tpp.service';
+import { ProductService } from '../../core/services/product.service';
 import { AuthService } from '../../core/services/auth.service';
-import { TPP, TPPApp, AppStats } from '../../core/models/models';
+import { TPP, TPPApp, AppStats, TPPSubscription } from '../../core/models/models';
 
 /**
  * DashboardComponent — Developer home page showing app stats.
@@ -16,7 +17,7 @@ import { TPP, TPPApp, AppStats } from '../../core/models/models';
     <div class="page-content">
       <div class="page-header">
         <div>
-          <h1>Welcome back, Developer 👋</h1>
+          <h1>Welcome back, {{ userName || 'Developer' }}</h1>
           <p class="page-subtitle">Here's an overview of your apps and API usage</p>
         </div>
         <a routerLink="/developer/apps/new" class="btn btn-primary">
@@ -70,6 +71,7 @@ import { TPP, TPPApp, AppStats } from '../../core/models/models';
               <th>TPP</th>
               <th>Scopes</th>
               <th>Status</th>
+              <th>Subscriptions</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -98,6 +100,25 @@ import { TPP, TPPApp, AppStats } from '../../core/models/models';
                       }">
                   {{ app.status }}
                 </span>
+              </td>
+              <td>
+                <div *ngIf="getSubscriptionsFor(app.tppAppId).length === 0" class="text-sm text-muted">—</div>
+                <div *ngFor="let sub of getSubscriptionsFor(app.tppAppId)"
+                     style="display:flex; gap:6px; align-items:center; padding:2px 0; font-size:0.8rem;">
+                  <span class="badge"
+                        [ngClass]="sub.apiPlan?.environment === 'SANDBOX' ? 'badge-sandbox' : 'badge-info'"
+                        style="font-size:0.65rem">
+                    {{ sub.apiPlan?.environment }}
+                  </span>
+                  <span>{{ sub.apiPlan?.apiProduct?.name || 'Plan' }}</span>
+                  <span class="badge"
+                        [ngClass]="{
+                          'badge-active': sub.status === 'ACTIVE',
+                          'badge-revoked': sub.status === 'SUSPENDED',
+                          'badge-expired': sub.status === 'CANCELLED'
+                        }"
+                        style="font-size:0.65rem">{{ sub.status }}</span>
+                </div>
               </td>
               <td>
                 <a [routerLink]="['/developer/apps', app.tppAppId, 'keys']" class="btn btn-secondary btn-sm">
@@ -163,25 +184,32 @@ export class DashboardComponent implements OnInit {
 
   apps: TPPApp[] = [];
   tpps: TPP[] = [];
+  subscriptionsByApp: { [appId: number]: TPPSubscription[] } = {};
+  userName = '';
   isLoading = true;
   errorMessage = '';
 
   stats = [
-    { label: 'Total Apps',     value: '0', icon: 'fas fa-cube',          gradient: 'linear-gradient(135deg, #667eea, #764ba2)' },
-    { label: 'API Calls',      value: '0', icon: 'fas fa-exchange-alt',  gradient: 'linear-gradient(135deg, #10b981, #059669)' },
-    { label: 'Error Rate',     value: '0%', icon: 'fas fa-bug',          gradient: 'linear-gradient(135deg, #ef4444, #dc2626)' },
-    { label: 'Avg Latency',    value: '0ms', icon: 'fas fa-clock',       gradient: 'linear-gradient(135deg, #f59e0b, #d97706)' }
+    { label: 'Total Apps',  value: '0',   icon: 'fas fa-cube',          gradient: '#0a2540' },
+    { label: 'API Calls',   value: '0',   icon: 'fas fa-exchange-alt',  gradient: '#1e40af' },
+    { label: 'Error Rate',  value: '0%',  icon: 'fas fa-bug',           gradient: '#dc2626' },
+    { label: 'Avg Latency', value: '0ms', icon: 'fas fa-clock',         gradient: '#c79a2a' }
   ];
 
-  constructor(private tppService: TppService) {}
+  constructor(
+    private tppService: TppService,
+    private productService: ProductService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.userName = this.authService.getName();
     this.loadApps();
     this.loadTpps();
   }
 
   loadApps(): void {
-    this.tppService.getApps().subscribe({
+    this.tppService.getMyApps(this.authService.getEmail()).subscribe({
       next: (data) => {
         this.apps = data || [];
         this.stats[0].value = this.apps.length.toString();
@@ -195,6 +223,13 @@ export class DashboardComponent implements OnInit {
             },
             error: () => { /* stats remain at 0 */ }
           });
+
+          for (const app of this.apps) {
+            this.productService.getSubscriptionsByApp(app.tppAppId).subscribe({
+              next: (subs) => { this.subscriptionsByApp[app.tppAppId] = subs || []; },
+              error: () => { this.subscriptionsByApp[app.tppAppId] = []; }
+            });
+          }
         }
         this.isLoading = false;
       },
@@ -205,8 +240,12 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  getSubscriptionsFor(appId: number): TPPSubscription[] {
+    return this.subscriptionsByApp[appId] || [];
+  }
+
   loadTpps(): void {
-    this.tppService.getTpps().subscribe({
+    this.tppService.getMyTpps(this.authService.getEmail()).subscribe({
       next: (data) => {
         this.tpps = data || [];
       },

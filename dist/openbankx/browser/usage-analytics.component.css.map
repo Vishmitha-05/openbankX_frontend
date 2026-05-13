@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/developer-portal/usage-analytics/usage-analytics.component.css"],
+  "sourcesContent": [".bar-chart { display: flex; flex-direction: column; gap: 12px; }\r\n.bar-item { display: grid; grid-template-columns: 120px 1fr 60px; align-items: center; gap: 12px; }\r\n.bar-track { height: 24px; background: rgba(0,0,0,0.05); border-radius: 6px; overflow: hidden; }\r\n.bar-fill { height: 100%; border-radius: 6px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }\r\n"],
+  "mappings": ";AAAA,CAAC;AAAY,WAAS;AAAM,kBAAgB;AAAQ,OAAK;AAAM;AAC/D,CAAC;AAAW,WAAS;AAAM,yBAAuB,MAAM,IAAI;AAAM,eAAa;AAAQ,OAAK;AAAM;AAClG,CAAC;AAAY,UAAQ;AAAM,cAAY,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAO,iBAAe;AAAK,YAAU;AAAQ;AAC/F,CAAC;AAAW,UAAQ;AAAM,iBAAe;AAAK,cAAY,MAAM,KAAK,aAAa,GAAG,EAAC,CAAC,EAAC,GAAG,EAAC;AAAI;",
+  "names": []
+}

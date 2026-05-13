@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/developer-portal/dashboard/dashboard.component.css"],
+  "sourcesContent": [".app-icon-sm {\n  width: 32px;\n  height: 32px;\n  background: #eff6ff;\n  border: 1px solid #bfdbfe;\n  border-radius: 6px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: var(--accent-blue);\n  font-size: 0.85rem;\n}\n"],
+  "mappings": ";AAAA,CAAC;AACC,SAAO;AACP,UAAQ;AACR,cAAY;AACZ,UAAQ,IAAI,MAAM;AAClB,iBAAe;AACf,WAAS;AACT,eAAa;AACb,mBAAiB;AACjB,SAAO,IAAI;AACX,aAAW;AACb;",
+  "names": []
+}

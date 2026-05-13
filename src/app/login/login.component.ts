@@ -4,13 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 
-/**
- * LoginComponent — Real JWT-based login page.
- *
- * DIRECTIVES DEMONSTRATED:
- *   [(ngModel)]  → Two-way binding on email and password
- *   *ngIf        → Show error messages, loading spinner
- */
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -41,7 +34,6 @@ export class LoginComponent {
 
     this.authService.login(this.email, this.password).subscribe({
       next: (response: any) => {
-        // Backend returns { accessToken, userId, name, email, role }
         this.authService.saveSession(
           response.userId,
           response.name,
@@ -50,18 +42,13 @@ export class LoginComponent {
           response.accessToken
         );
 
-        this.successMessage = `Welcome, ${response.name}! Redirecting to ${response.role} portal...`;
+        this.successMessage = `Welcome, ${response.name}!`;
 
-        // Route based on role
+        const target = this.routeForRole(response.role);
         setTimeout(() => {
-          switch (response.role) {
-            case 'TPP':        this.router.navigate(['/developer/dashboard']); break;
-            case 'CUSTOMER':   this.router.navigate(['/customer/consents']); break;
-            case 'OPERATIONS': this.router.navigate(['/operations/health']); break;
-            case 'ADMIN':      this.router.navigate(['/admin/products']); break;
-            default:           this.router.navigate(['/login']);
-          }
-        }, 600);
+          this.isLoading = false;
+          this.router.navigate([target]);
+        }, 400);
       },
       error: (err: any) => {
         this.isLoading = false;
@@ -74,5 +61,15 @@ export class LoginComponent {
         }
       }
     });
+  }
+
+  private routeForRole(role: string): string {
+    switch (role) {
+      case 'TPP':        return '/developer/dashboard';
+      case 'CUSTOMER':   return '/customer/consents';
+      case 'OPERATIONS': return '/operations/health';
+      case 'ADMIN':      return '/admin/products';
+      default:           return '/login';
+    }
   }
 }

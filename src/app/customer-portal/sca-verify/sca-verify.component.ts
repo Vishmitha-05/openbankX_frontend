@@ -2,9 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../../core/services/auth.service';
-import { environment } from '../../../environments/environment';
+import { ConsentService } from '../../core/services/consent.service';
+
+type ScaMethod = 'OTP' | 'DEVICE' | 'APP';
+
+interface MethodConfig {
+  id: ScaMethod;
+  label: string;
+  description: string;
+  length: number;
+  alphabet: string;
+}
 
 @Component({
   selector: 'app-sca-verify',
@@ -12,69 +20,75 @@ import { environment } from '../../../environments/environment';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="page-content">
-      <div class="page-header"><div><h1><i class="fas fa-shield-alt"></i> SCA Verification</h1>
-        <p class="page-subtitle">Strong Customer Authentication — verify your identity</p></div>
+      <div class="page-header">
+        <div>
+          <h1><i class="fas fa-shield-alt"></i> SCA Verification</h1>
+          <p class="page-subtitle">Strong Customer Authentication — verify your identity to activate the consent</p>
+        </div>
       </div>
 
-      <div class="glass-card" style="max-width:440px">
-        <div class="sca-icon-wrapper">
-          <div class="sca-icon"><i class="fas fa-lock"></i></div>
-        </div>
+      <div class="glass-card" style="max-width:480px">
 
-        <!-- Consent info banner -->
-        <div class="alert alert-info mb-16" *ngIf="consentId" style="background:rgba(102,126,234,0.15);border:1px solid rgba(102,126,234,0.3);color:#a5b4fc;border-radius:10px;padding:12px;">
-          <i class="fas fa-info-circle"></i> Verifying consent <strong>#{{ consentId }}</strong>. Complete SCA to activate it.
+        <div class="alert alert-info mb-16" *ngIf="consentId">
+          <i class="fas fa-info-circle"></i>
+          Verifying consent <strong>#{{ consentId }}</strong>. Complete SCA to activate it.
         </div>
 
         <div class="form-group">
           <label>Verification Method</label>
           <div class="pill-tabs">
-            <button *ngFor="let m of methods" class="pill-tab"
-                    [ngClass]="{ 'active': method === m }"
-                    (click)="method = m">{{ m }}</button>
+            <button *ngFor="let m of methods"
+                    class="pill-tab"
+                    [ngClass]="{ 'active': method === m.id }"
+                    (click)="selectMethod(m.id)">
+              {{ m.label }}
+            </button>
           </div>
+          <small class="text-muted">{{ currentMethod.description }}</small>
+        </div>
+
+        <div class="alert alert-info mb-16">
+          <i class="fas fa-terminal"></i>
+          A one-time code has been generated. <strong>Open your browser console</strong>
+          (F12 → Console) to see it.
         </div>
 
         <div class="form-group">
-          <label>Reference ID (Consent/Payment ID)</label>
-          <input type="text" class="form-control" [(ngModel)]="referenceId" placeholder="e.g., 123456">
+          <label>Enter the {{ currentMethod.label }} code</label>
+          <input type="text"
+                 class="form-control otp-input"
+                 [(ngModel)]="enteredCode"
+                 [placeholder]="placeholder()"
+                 [maxlength]="currentMethod.length"
+                 autocomplete="off">
         </div>
 
-        <!-- OTP Display Box -->
-        <div class="alert alert-info mb-16" *ngIf="otpGenerated && generatedOtp" style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:#86efac;border-radius:10px;padding:16px;">
-          <div style="text-align:center">
-            <div style="font-size:0.9rem;margin-bottom:8px;opacity:0.8">Your OTP Code:</div>
-            <div style="font-size:2rem;font-weight:bold;letter-spacing:4px;font-family:monospace;">{{ generatedOtp }}</div>
-            <div style="font-size:0.8rem;margin-top:8px;opacity:0.7">This OTP has been generated for your SCA verification</div>
-          </div>
-        </div>
-
-        <div class="form-group" *ngIf="method === 'OTP'">
-          <label>Enter OTP Code</label>
-          <input type="text" class="form-control otp-input" [(ngModel)]="otpCode" placeholder="••••••" maxlength="6">
-        </div>
-
-        <button class="btn btn-primary" style="width:100%" (click)="verify()" [disabled]="isVerifying">
-          <span *ngIf="!isVerifying"><i class="fas fa-check-circle"></i> Verify</span>
-          <span *ngIf="isVerifying"><i class="fas fa-spinner fa-spin"></i> Verifying...</span>
+        <button class="btn btn-light mb-12" (click)="regenerateCode()">
+          <i class="fas fa-redo"></i> Generate a new code
         </button>
 
-        <div class="alert alert-success mt-16" *ngIf="result === 'PASS' && !consentActivated">
-          <i class="fas fa-check-circle"></i> SCA verification successful! Activating consent...
+        <button class="btn btn-primary" style="width:100%"
+                (click)="verify()"
+                [disabled]="isVerifying || activated">
+          <span *ngIf="!isVerifying && !activated">
+            <i class="fas fa-check-circle"></i> Verify &amp; activate consent
+          </span>
+          <span *ngIf="isVerifying">
+            <i class="fas fa-spinner fa-spin"></i> Verifying...
+          </span>
+          <span *ngIf="activated">
+            <i class="fas fa-check-circle"></i> Activated
+          </span>
+        </button>
+
+        <div class="alert alert-success mt-16" *ngIf="activated">
+          <i class="fas fa-check-circle"></i>
+          Consent <strong>#{{ consentId }}</strong> is now <strong>ACTIVE</strong>.
+          Redirecting to My Consents...
         </div>
-        <div class="alert alert-success mt-16" *ngIf="consentActivated">
-          <i class="fas fa-check-circle"></i> Consent <strong>#{{ consentId }}</strong> is now <strong>ACTIVE</strong>. You can now use this app!
-          <div class="mt-12">
-            <button class="btn btn-secondary btn-sm" (click)="goToConsents()">
-              <i class="fas fa-handshake"></i> View My Consents
-            </button>
-          </div>
-        </div>
-        <div class="alert alert-error mt-16" *ngIf="result === 'FAIL'">
-          <i class="fas fa-times-circle"></i> Verification failed. Please try again.
-        </div>
+
         <div class="alert alert-error mt-16" *ngIf="errorMessage">
-          <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+          <i class="fas fa-times-circle"></i> {{ errorMessage }}
         </div>
       </div>
     </div>
@@ -82,101 +96,101 @@ import { environment } from '../../../environments/environment';
   styleUrl: './sca-verify.component.css'
 })
 export class ScaVerifyComponent implements OnInit {
-  method = 'OTP';
-  referenceId = '';
-  otpCode = '';
-  result = '';
-  errorMessage = '';
-  isVerifying = false;
-  consentActivated = false;
-  consentId: string | null = null;
-  generatedOtp: string = '';
-  otpGenerated = false;
-  methods = ['OTP', 'DEVICE', 'APP'];
 
-  private apiUrl = environment.apiBaseUrl;
+  methods: MethodConfig[] = [
+    { id: 'OTP',    label: 'OTP (SMS)',     description: 'A 6-digit numeric code is sent to your registered phone.', length: 6, alphabet: '0123456789' },
+    { id: 'DEVICE', label: 'Device push',   description: 'A 4-digit code is pushed to your trusted device.',          length: 4, alphabet: '0123456789' },
+    { id: 'APP',    label: 'App approval',  description: 'An 8-character alphanumeric code from your banking app.',   length: 8, alphabet: 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' }
+  ];
+
+  method: ScaMethod = 'OTP';
+  generatedCode = '';
+  enteredCode = '';
+  consentId: number | null = null;
+
+  isVerifying = false;
+  activated = false;
+  errorMessage = '';
 
   constructor(
-    private authService: AuthService,
-    private http: HttpClient,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private consentService: ConsentService
   ) {}
 
   ngOnInit(): void {
-    // Read consentId from query params (set by app-browser after consent creation)
     this.route.queryParams.subscribe(params => {
-      if (params['consentId']) {
-        this.consentId = params['consentId'];
-        this.referenceId = this.consentId!;
-        // Auto-generate OTP when page loads
-        this.generateOtp();
+      if (params['consentId']) this.consentId = Number(params['consentId']);
+      if (params['method'] && this.methods.some(m => m.id === params['method'])) {
+        this.method = params['method'] as ScaMethod;
       }
+      this.regenerateCode();
     });
   }
 
-  generateOtp(): void {
-    if (!this.referenceId) {
-      this.errorMessage = 'Reference ID is required';
-      return;
-    }
+  get currentMethod(): MethodConfig {
+    return this.methods.find(m => m.id === this.method)!;
+  }
 
-    this.http.post<any>(`${this.apiUrl}/sca/otp?userId=${this.authService.getUserId()}&referenceId=${this.referenceId}`, {}).subscribe({
-      next: (response) => {
-        this.generatedOtp = response.otp || response.code || '123456';
-        this.otpGenerated = true;
-        console.log('OTP Generated:', this.generatedOtp);
-      },
-      error: (err) => {
-        console.error('OTP generation error:', err);
-        this.errorMessage = 'Failed to generate OTP. Please try again.';
-      }
-    });
+  selectMethod(id: ScaMethod): void {
+    if (this.method === id) return;
+    this.method = id;
+    this.enteredCode = '';
+    this.errorMessage = '';
+    this.regenerateCode();
+  }
+
+  /** Generate a random code locally based on the SCA method and log it to the console. */
+  regenerateCode(): void {
+    const cfg = this.currentMethod;
+    let code = '';
+    for (let i = 0; i < cfg.length; i++) {
+      code += cfg.alphabet.charAt(Math.floor(Math.random() * cfg.alphabet.length));
+    }
+    this.generatedCode = code;
+    this.errorMessage = '';
+
+    console.log(
+      `%c[SCA] ${cfg.label} code for consent #${this.consentId ?? '—'}: %c${code}`,
+      'color:#1e40af; font-weight:bold;',
+      'color:#c79a2a; font-weight:bold; font-size:1.1em; letter-spacing:2px;'
+    );
+  }
+
+  placeholder(): string {
+    return '•'.repeat(this.currentMethod.length);
   }
 
   verify(): void {
-    if (!this.otpCode.trim()) {
-      this.errorMessage = 'Please enter the OTP code';
+    this.errorMessage = '';
+    const entered = (this.enteredCode || '').trim().toUpperCase();
+    const expected = (this.generatedCode || '').toUpperCase();
+
+    if (!entered) {
+      this.errorMessage = `Please enter the ${this.currentMethod.label} code shown in the console.`;
+      return;
+    }
+    if (entered !== expected) {
+      this.errorMessage = 'That code is incorrect. Check the browser console for the current code, or generate a new one.';
+      return;
+    }
+    if (!this.consentId) {
+      this.errorMessage = 'No consent reference found. Go back to Browse Apps and try again.';
       return;
     }
 
     this.isVerifying = true;
-    this.result = '';
-    this.errorMessage = '';
-    this.consentActivated = false;
-
-    this.authService.verifySca(this.authService.getUserId(), this.method, this.referenceId).subscribe({
+    this.consentService.activateAfterSca(this.consentId, this.method).subscribe({
       next: () => {
-        this.result = 'PASS';
         this.isVerifying = false;
-
-        // If we have a consentId, activate the consent after SCA passes
-        if (this.consentId) {
-          this.activateConsent();
-        }
+        this.activated = true;
+        setTimeout(() => this.router.navigate(['/customer/consents']), 1500);
       },
       error: (err) => {
-        console.error('SCA verification error:', err);
-        this.errorMessage = 'SCA verification failed. Please ensure backend is running.';
         this.isVerifying = false;
+        this.errorMessage = err?.error?.message
+          || 'SCA passed but the consent could not be activated. Please try again.';
       }
     });
-  }
-
-  private activateConsent(): void {
-    this.http.put<any>(`${this.apiUrl}/consents/${this.consentId}/activate`, {}).subscribe({
-      next: () => {
-        this.consentActivated = true;
-      },
-      error: (err) => {
-        console.error('Consent activation error:', err);
-        this.errorMessage = 'SCA passed but failed to activate consent. Please try again.';
-      }
-    });
-  }
-
-  goToConsents(): void {
-    this.router.navigate(['/customer/consents']);
   }
 }
-

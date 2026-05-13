@@ -76,6 +76,18 @@ export class AuthService {
     return session ? session.token : '';
   }
 
+  /** Get the current user's email */
+  getEmail(): string {
+    const session = this.getSession();
+    return session ? session.email : '';
+  }
+
+  /** Get the current user's display name */
+  getName(): string {
+    const session = this.getSession();
+    return session ? session.name : '';
+  }
+
   /** Logout — clear session */
   logout(): void {
     localStorage.removeItem('obx_session');

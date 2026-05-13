@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;fd15e00f7e2c51e7646dcc59182b59a80d3585032d783fc1cc3c8f34febeaa78;c:/Users/2478956/OneDrive - Cognizant/Desktop/OpenBankX_Project/openbankX_frontend/src/app/customer-portal/app-browser/app-browser.component.ts"],
+  "sourcesContent": ["\n    .app-card { padding: 24px; min-height: 240px; }\n    .app-title { font-size: 1.1rem; font-weight: 600; }\n    .scope-checkboxes {\n      display: flex; flex-direction: column; gap: 8px;\n    }\n    .scope-check-item {\n      display: flex; align-items: center; gap: 8px;\n      cursor: pointer; user-select: none;\n    }\n    .connected-summary {\n      margin-top: 12px;\n      padding: 12px 14px;\n      background: #f0fdf4;\n      border: 1px solid #bbf7d0;\n      border-radius: 8px;\n      display: flex;\n      flex-direction: column;\n      gap: 4px;\n    }\n    .summary-row {\n      display: flex;\n      justify-content: space-between;\n      font-size: 0.85rem;\n    }\n    .action-row {\n      display: flex;\n      flex-wrap: wrap;\n      gap: 8px;\n    }\n  "],
+  "mappings": ";AACI,CAAC;AAAW,WAAS;AAAM,cAAY;AAAO;AAC9C,CAAC;AAAY,aAAW;AAAQ,eAAa;AAAK;AAClD,CAAC;AACC,WAAS;AAAM,kBAAgB;AAAQ,OAAK;AAC9C;AACA,CAAC;AACC,WAAS;AAAM,eAAa;AAAQ,OAAK;AACzC,UAAQ;AAAS,uBAAa;AAAb,eAAa;AAChC;AACA,CAAC;AACC,cAAY;AACZ,WAAS,KAAK;AACd,cAAY;AACZ,UAAQ,IAAI,MAAM;AAClB,iBAAe;AACf,WAAS;AACT,kBAAgB;AAChB,OAAK;AACP;AACA,CAAC;AACC,WAAS;AACT,mBAAiB;AACjB,aAAW;AACb;AACA,CAAC;AACC,WAAS;AACT,aAAW;AACX,OAAK;AACP;",
+  "names": []
+}

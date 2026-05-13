@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin-portal/sca-policy/sca-policy.component.css"],
+  "sourcesContent": [".policy-item { padding:12px 0; border-bottom:1px solid rgba(0,0,0,0.04); }\r\n.toggle { position:relative;display:inline-block;width:44px;height:24px;cursor:pointer; }\r\n.toggle input { opacity:0;width:0;height:0; }\r\n.toggle-slider { position:absolute;inset:0;background:rgba(0,0,0,0.1);border-radius:12px;transition:0.3s; }\r\n.toggle-slider:before { content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;box-shadow: 0 1px 3px rgba(0,0,0,0.1); }\r\n.toggle input:checked + .toggle-slider { background:#16a34a; }\r\n.toggle input:checked + .toggle-slider:before { transform:translateX(20px); }\r\n"],
+  "mappings": ";AAAA,CAAC;AAAc,WAAQ,KAAK;AAAG,iBAAc,IAAI,MAAM,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAO;AACzE,CAAC;AAAS,YAAS;AAAS,WAAQ;AAAa,SAAM;AAAK,UAAO;AAAK,UAAO;AAAS;AACxF,CADC,OACO;AAAQ,WAAQ;AAAE,SAAM;AAAE,UAAO;AAAG;AAC5C,CAAC;AAAgB,YAAS;AAAS,SAAM;AAAE,cAAW,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAK,iBAAc;AAAK,cAAW;AAAM;AAC1G,CADC,aACa;AAAU,WAAQ;AAAG,YAAS;AAAS,UAAO;AAAK,SAAM;AAAK,QAAK;AAAI,UAAO;AAAI,cAAW;AAAK,iBAAc;AAAI,cAAW;AAAK,cAAY,EAAE,IAAI,IAAI,KAAK,CAAC,EAAC,CAAC,EAAC,CAAC,EAAC;AAAM;AACzL,CAJC,OAIO,KAAK,SAAS,EAAE,CAFvB;AAEwC,cAAW;AAAS;AAC7D,CALC,OAKO,KAAK,SAAS,EAAE,CAHvB,aAGqC;AAAU,aAAU,WAAW;AAAO;",
+  "names": []
+}

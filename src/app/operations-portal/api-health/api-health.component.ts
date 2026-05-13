@@ -42,7 +42,12 @@ import { APILog } from '../../core/models/models';
           <tbody>
             <tr *ngFor="let log of logs">
               <td class="text-sm">{{ log.timestamp | date:'medium' }}</td>
-              <td>{{ log.tppApp?.appName || 'System' }}</td>
+              <td>
+                <strong *ngIf="resolveAppName(log) as appName">{{ appName }}</strong>
+                <span class="text-muted text-sm" *ngIf="!resolveAppName(log)">
+                  <i class="fas fa-server"></i> Internal
+                </span>
+              </td>
               <td>
                 <span class="badge" [ngClass]="{
                   'badge-active': log.method === 'GET',
@@ -70,10 +75,10 @@ export class ApiHealthComponent implements OnInit {
   isLoading = true;
   logs: APILog[] = [];
   metrics = [
-    { label: 'Total Requests', value: '—', icon: 'fas fa-bolt', gradient: 'linear-gradient(135deg,#667eea,#764ba2)' },
-    { label: 'Avg Latency', value: '—', icon: 'fas fa-clock', gradient: 'linear-gradient(135deg,#10b981,#059669)' },
-    { label: 'Error Rate', value: '—', icon: 'fas fa-bug', gradient: 'linear-gradient(135deg,#ef4444,#dc2626)' },
-    { label: 'Incidents', value: '0', icon: 'fas fa-exclamation-triangle', gradient: 'linear-gradient(135deg,#f59e0b,#d97706)' }
+    { label: 'Total Requests', value: '—', icon: 'fas fa-bolt',                  gradient: '#0a2540' },
+    { label: 'Avg Latency',    value: '—', icon: 'fas fa-clock',                 gradient: '#1e40af' },
+    { label: 'Error Rate',     value: '—', icon: 'fas fa-bug',                   gradient: '#dc2626' },
+    { label: 'Incidents',      value: '0', icon: 'fas fa-exclamation-triangle',  gradient: '#c79a2a' }
   ];
 
   constructor(private monitoringService: MonitoringService) {}
@@ -102,6 +107,13 @@ export class ApiHealthComponent implements OnInit {
         }
       }
     });
+  }
+
+  resolveAppName(log: APILog): string {
+    return log.tppApp?.appName
+      || (log as any).appName
+      || (log.authClient?.tppApp?.appName)
+      || '';
   }
 
   private calculateMetrics(): void {

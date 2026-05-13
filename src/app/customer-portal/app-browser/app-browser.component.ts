@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TppService } from '../../core/services/tpp.service';
+import { ProductService } from '../../core/services/product.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ConsentService } from '../../core/services/consent.service';
-import { Consent } from '../../core/models/models';
+import { Consent, TPPApp, TPPSubscription } from '../../core/models/models';
 
 @Component({
   selector: 'app-browser',
@@ -13,296 +14,333 @@ import { Consent } from '../../core/models/models';
   imports: [CommonModule, FormsModule],
   template: `
     <div class="page-content">
-
-      <!-- HEADER -->
       <div class="page-header">
-        <h1><i class="fas fa-store"></i> Browse Apps</h1>
-        <p class="page-subtitle">
-          Discover trusted apps and manage how they access your financial data
-        </p>
+        <div>
+          <h1><i class="fas fa-store"></i> My Apps</h1>
+          <p class="page-subtitle">
+            Apps approved by the bank that are live for use — grant access and start using them
+          </p>
+        </div>
       </div>
 
-      <!-- LOADING -->
       <div class="loading-container" *ngIf="isLoading">
         <div class="spinner"></div>
         <span>Loading apps...</span>
       </div>
 
-      <!-- ERROR -->
       <div class="alert alert-error" *ngIf="errorMessage">
-        {{ errorMessage }}
+        <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
       </div>
 
-      <!-- APP GRID -->
+      <div class="empty-state" *ngIf="!isLoading && availableApps.length === 0 && !errorMessage">
+        <i class="fas fa-store"></i>
+        <p>No live apps are available right now. Approved apps will appear here once their developer has subscribed to a plan.</p>
+      </div>
+
       <div class="grid-2" *ngIf="!isLoading">
 
-        <div *ngFor="let app of apps" class="glass-card app-card">
+        <div *ngFor="let app of availableApps" class="glass-card app-card">
 
-          <!-- APP HEADER -->
           <div class="flex justify-between items-start mb-8">
             <div>
               <h3 class="app-title">{{ app.appName }}</h3>
               <p class="text-sm text-muted">
-                Provided by {{ app.tppName || 'Trusted Partner' }}
+                Provided by {{ app.tpp?.legalName || 'a trusted TPP' }}
               </p>
             </div>
-            <span class="badge badge-active">{{ app.status }}</span>
+            <span class="badge"
+                  [ngClass]="hasActiveConsent(app.tppAppId) ? 'badge-active' : 'badge-info'">
+              {{ hasActiveConsent(app.tppAppId) ? 'CONNECTED' : 'AVAILABLE' }}
+            </span>
           </div>
 
-          <!-- APP DESCRIPTION -->
-          <p class="text-sm text-muted mb-12">
-            {{ app.description || 
-               'This app helps you securely view and manage your financial information.' }}
-          </p>
+          <!-- ============================================================
+               Already granted — show app summary + open buttons
+               ============================================================ -->
+          <ng-container *ngIf="hasActiveConsent(app.tppAppId)">
+            <div class="connected-summary">
+              <div class="summary-row">
+                <span class="text-sm text-muted">Permissions granted</span>
+                <strong>{{ grantedScopes(app.tppAppId).length }}</strong>
+              </div>
+              <div class="summary-row">
+                <span class="text-sm text-muted">Consent ID</span>
+                <strong>#{{ activeConsentId(app.tppAppId) }}</strong>
+              </div>
+              <div class="summary-row" *ngIf="consentExpiry(app.tppAppId) as exp">
+                <span class="text-sm text-muted">Access valid until</span>
+                <strong>{{ exp | date:'mediumDate' }}</strong>
+              </div>
+            </div>
 
-          <!-- REQUESTED PERMISSIONS -->
-          <div class="mb-12">
-            <label class="text-xs text-muted uppercase">
-              Permissions Requested
-            </label>
-            <div class="flex gap-8 mt-4 flex-wrap">
-              <span *ngFor="let scope of parseScopes(app.scopesRequested)"
-                    class="badge badge-soft">
+            <div class="mt-12">
+              <span *ngFor="let scope of grantedScopes(app.tppAppId)" class="scope-pill">
                 {{ getScopeLabel(scope) }}
               </span>
             </div>
-          </div>
 
-          <!-- GRANT ACCESS (NO CONSENT) -->
-          <div *ngIf="!consentedAppIds.has(app.tppAppId)
-                       && selectedApp?.tppAppId !== app.tppAppId">
-            <button class="btn btn-primary"
-                    (click)="openConsentForm(app)">
-              <i class="fas fa-handshake"></i> Grant Access
-            </button>
-          </div>
-
-          <!-- ✅ ACTIONS AFTER CONSENT -->
-          <div *ngIf="consentedAppIds.has(app.tppAppId)" class="mt-12">
-
-            <p class="text-xs text-success mb-8">
-              ✅ Access granted
-            </p>
-
-            <div class="flex gap-8 flex-wrap">
-
-              <button class="btn btn-success"
-                *ngIf="hasAccountsAccess(app.tppAppId)"
-                (click)="goToAccounts(app)">
+            <div class="action-row mt-16">
+              <button *ngIf="hasScopeFor(app.tppAppId, 'accounts')"
+                      class="btn btn-primary btn-sm"
+                      (click)="openAccounts(app)">
                 <i class="fas fa-wallet"></i> Accounts
               </button>
-
-              <button class="btn btn-warning"
-                *ngIf="hasPaymentsAccess(app.tppAppId)"
-                (click)="goToPayments(app)">
-                <i class="fas fa-paper-plane"></i> Make Payment
+              <button *ngIf="hasScopeFor(app.tppAppId, 'payments')"
+                      class="btn btn-primary btn-sm"
+                      (click)="openPayments(app)">
+                <i class="fas fa-paper-plane"></i> Payments
               </button>
-
-              <button class="btn btn-info"
-                *ngIf="hasBalanceAccess(app.tppAppId)"
-                (click)="goToBalance(app)">
-                <i class="fas fa-coins"></i> Check Balance
+              <button *ngIf="hasScopeFor(app.tppAppId, 'funds-confirmations') || hasScopeFor(app.tppAppId, 'balances')"
+                      class="btn btn-primary btn-sm"
+                      (click)="openFunds(app)">
+                <i class="fas fa-coins"></i> Funds Check
               </button>
-
-            </div>
-          </div>
-
-          <!-- CONSENT FORM -->
-          <div *ngIf="selectedApp?.tppAppId === app.tppAppId" class="mt-16">
-            <h4 class="mb-8">Select Permissions</h4>
-
-            <div *ngFor="let scope of parseScopes(app.scopesRequested)"
-                 class="flex gap-8 mb-4">
-              <input type="checkbox"
-                     [checked]="selectedScopes.includes(scope)"
-                     (change)="toggleScope(scope)">
-              {{ getScopeLabel(scope) }}
-            </div>
-
-            <div class="flex gap-8 mt-12">
-              <button class="btn btn-success"
-                [disabled]="selectedScopes.length === 0"
-                (click)="submitConsent()">
-                Submit
-              </button>
-              <button class="btn btn-light"
-                (click)="cancelConsent()">
-                Cancel
+              <button class="btn btn-light btn-sm" (click)="manageConsent()">
+                <i class="fas fa-sliders-h"></i> Manage
               </button>
             </div>
+          </ng-container>
 
-            <div class="alert alert-error mt-12"
-                 *ngIf="consentError">
-              {{ consentError }}
+          <!-- ============================================================
+               Not granted yet — pick scopes + grant
+               ============================================================ -->
+          <ng-container *ngIf="!hasActiveConsent(app.tppAppId)">
+            <label class="text-sm text-muted"
+                   style="text-transform:uppercase; letter-spacing:0.05em;">
+              Choose what {{ app.appName }} can access
+            </label>
+
+            <div class="scope-checkboxes mt-8">
+              <label *ngFor="let scope of parseScopes(app.scopesRequested)"
+                     class="scope-check-item">
+                <input type="checkbox"
+                       [checked]="isScopeSelected(app.tppAppId, scope)"
+                       (change)="toggleScope(app.tppAppId, scope)">
+                <span class="scope-pill">{{ getScopeLabel(scope) }}</span>
+              </label>
             </div>
-          </div>
 
+            <div class="alert alert-error mt-12" *ngIf="appErrors[app.tppAppId]">
+              <i class="fas fa-exclamation-circle"></i> {{ appErrors[app.tppAppId] }}
+            </div>
+
+            <button class="btn btn-primary mt-12"
+                    (click)="grantAccess(app)"
+                    [disabled]="pendingAppId === app.tppAppId">
+              <span *ngIf="pendingAppId !== app.tppAppId">
+                <i class="fas fa-handshake"></i> Grant access &amp; verify
+              </span>
+              <span *ngIf="pendingAppId === app.tppAppId">
+                <i class="fas fa-spinner fa-spin"></i> Creating consent...
+              </span>
+            </button>
+          </ng-container>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .app-card {
-      padding: 24px;
-      min-height: 280px;
+    .app-card { padding: 24px; min-height: 240px; }
+    .app-title { font-size: 1.1rem; font-weight: 600; }
+    .scope-checkboxes {
+      display: flex; flex-direction: column; gap: 8px;
     }
-
-    .app-title {
-      font-size: 1.1rem;
-      font-weight: 600;
+    .scope-check-item {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer; user-select: none;
     }
-
-    .badge-soft {
-      background-color: #eef2ff;
-      color: #4338ca;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 16px;
+    .connected-summary {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
-
-    .flex.gap-8 {
-      row-gap: 8px;
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+    .action-row {
+      display: flex;
       flex-wrap: wrap;
+      gap: 8px;
     }
   `]
 })
 export class AppBrowserComponent implements OnInit {
 
-  apps: any[] = [];
+  availableApps: TPPApp[] = [];
   isLoading = true;
   errorMessage = '';
 
-  selectedApp: any = null;
-  selectedScopes: string[] = [];
-  consentError = '';
+  /** Active consents for the current user, keyed by tppAppId. */
+  consentsByApp = new Map<number, Consent>();
 
-  consentedAppIds = new Set<number>();
-  consentScopesByApp = new Map<number, string[]>();
+  /** Scope picks per app (for non-granted apps). */
+  selectedScopesByApp = new Map<number, string[]>();
+  appErrors: { [appId: number]: string } = {};
+  pendingAppId: number | null = null;
 
   constructor(
     private tppService: TppService,
+    private productService: ProductService,
     private authService: AuthService,
     private consentService: ConsentService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.tppService.getApps().subscribe({
-      next: data => {
-        this.apps = (data || []).filter((a: any) => a.status === 'APPROVED');
-        this.isLoading = false;
-      },
-      error: () => this.isLoading = false
+    this.loadAvailableApps();
+    this.loadExistingConsents();
+  }
+
+  /** Only APPROVED apps with at least one ACTIVE subscription. */
+  private loadAvailableApps(): void {
+    this.isLoading = true;
+    Promise.all([
+      this.tppService.getApps().toPromise(),
+      this.productService.getSubscriptions().toPromise()
+    ]).then(([apps, subs]) => {
+      const activeSubs = (subs || []).filter(s => s.status === 'ACTIVE');
+      const subscribedAppIds = new Set<number>(
+        activeSubs
+          .map((s: TPPSubscription) => s.tppApp?.tppAppId)
+          .filter((id): id is number => typeof id === 'number')
+      );
+
+      this.availableApps = (apps || []).filter(a =>
+        a.status === 'APPROVED' && subscribedAppIds.has(a.tppAppId)
+      );
+      this.isLoading = false;
+    }).catch(() => {
+      this.isLoading = false;
+      this.errorMessage = 'Unable to load apps. Please ensure the backend is running.';
     });
+  }
 
+  private loadExistingConsents(): void {
     const userId = this.authService.getUserId();
-    if (userId) {
-      this.consentService.getConsentsByUser(userId)
-        .subscribe((consents: Consent[]) => {
-          consents.forEach(c => {
-            if (c.status === 'ACTIVE' && c.tppApp?.tppAppId) {
-              this.consentedAppIds.add(c.tppApp.tppAppId);
-              try {
-                this.consentScopesByApp.set(
-                  c.tppApp.tppAppId,
-                  JSON.parse(c.scopeJSON || '[]')
-                );
-              } catch {
-                this.consentScopesByApp.set(c.tppApp.tppAppId, []);
-              }
-            }
-          });
-        });
-    }
-  }
-
-  /* ---- SCOPE CHECKERS ---- */
-
-  hasAccountsAccess(appId: number): boolean {
-    const s = this.consentScopesByApp.get(appId);
-    return !!s && s.includes('accounts');
-  }
-
-  hasPaymentsAccess(appId: number): boolean {
-    const s = this.consentScopesByApp.get(appId);
-    return !!s && s.includes('payments');
-  }
-
-  hasBalanceAccess(appId: number): boolean {
-    const s = this.consentScopesByApp.get(appId);
-    return !!s && (s.includes('funds-confirmations') || s.includes('balances'));
-  }
-
-  /* ---- ACTIONS ---- */
-
-  openConsentForm(app: any): void {
-    this.selectedApp = app;
-    this.selectedScopes = [];
-  }
-
-  cancelConsent(): void {
-    this.selectedApp = null;
-    this.selectedScopes = [];
-  }
-
-  toggleScope(scope: string): void {
-    const i = this.selectedScopes.indexOf(scope);
-    i >= 0
-      ? this.selectedScopes.splice(i, 1)
-      : this.selectedScopes.push(scope);
-  }
-
-  submitConsent(): void {
-    const payload = {
-      user: { userId: this.authService.getUserId() },
-      tppApp: { tppAppId: this.selectedApp.tppAppId },
-      scopeJSON: JSON.stringify(this.selectedScopes)
-    };
-
-    this.consentService.createConsent(payload).subscribe({
-      next: (c: Partial<Consent>) => {
-        this.consentedAppIds.add(this.selectedApp.tppAppId);
-        this.consentScopesByApp.set(this.selectedApp.tppAppId, this.selectedScopes);
-        this.selectedApp = null;
-        this.selectedScopes = [];
-        this.router.navigate(['/customer/sca'], {
-          queryParams: { consentId: c.consentId }
-        });
+    if (!userId) return;
+    this.consentService.getConsentsByUser(userId).subscribe({
+      next: (consents: Consent[]) => {
+        consents
+          .filter(c => c.status === 'ACTIVE' && c.tppApp?.tppAppId)
+          .forEach(c => this.consentsByApp.set(c.tppApp.tppAppId, c));
       }
     });
   }
 
-  goToAccounts(app: any): void {
+  /* ---------- Consent state helpers ---------- */
+
+  hasActiveConsent(appId: number): boolean {
+    return this.consentsByApp.has(appId);
+  }
+
+  activeConsentId(appId: number): number | null {
+    return this.consentsByApp.get(appId)?.consentId ?? null;
+  }
+
+  consentExpiry(appId: number): string | null {
+    return this.consentsByApp.get(appId)?.expiryDate ?? null;
+  }
+
+  grantedScopes(appId: number): string[] {
+    const consent = this.consentsByApp.get(appId);
+    if (!consent) return [];
+    try { return JSON.parse(consent.scopeJSON || '[]'); } catch { return []; }
+  }
+
+  hasScopeFor(appId: number, scope: string): boolean {
+    return this.grantedScopes(appId).includes(scope);
+  }
+
+  /* ---------- Scope picker helpers ---------- */
+
+  parseScopes(s: string): string[] {
+    try { return JSON.parse(s) || []; } catch { return []; }
+  }
+
+  isScopeSelected(appId: number, scope: string): boolean {
+    return (this.selectedScopesByApp.get(appId) || []).includes(scope);
+  }
+
+  toggleScope(appId: number, scope: string): void {
+    const current = this.selectedScopesByApp.get(appId) || [];
+    const next = current.includes(scope)
+      ? current.filter(s => s !== scope)
+      : [...current, scope];
+    this.selectedScopesByApp.set(appId, next);
+    if (this.appErrors[appId]) this.appErrors[appId] = '';
+  }
+
+  getScopeLabel(scope: string): string {
+    const map: { [k: string]: string } = {
+      'accounts':            'View accounts',
+      'balances':            'View balances',
+      'payments':            'Initiate payments',
+      'funds-confirmations': 'Confirm funds availability'
+    };
+    return map[scope] || scope;
+  }
+
+  /* ---------- Grant access ---------- */
+
+  grantAccess(app: TPPApp): void {
+    const scopes = this.selectedScopesByApp.get(app.tppAppId) || [];
+    if (scopes.length === 0) {
+      this.appErrors[app.tppAppId] = 'Pick at least one permission before granting access.';
+      return;
+    }
+
+    this.appErrors[app.tppAppId] = '';
+    this.pendingAppId = app.tppAppId;
+
+    const payload = {
+      user: { userId: this.authService.getUserId() },
+      tppApp: { tppAppId: app.tppAppId },
+      scopeJSON: JSON.stringify(scopes)
+    };
+
+    this.consentService.createConsent(payload).subscribe({
+      next: (consent: Partial<Consent>) => {
+        this.pendingAppId = null;
+        this.router.navigate(['/customer/sca'], {
+          queryParams: { consentId: consent.consentId, method: 'OTP' }
+        });
+      },
+      error: (err) => {
+        this.pendingAppId = null;
+        this.appErrors[app.tppAppId] =
+          err?.error?.message || 'Could not create the consent — please try again.';
+      }
+    });
+  }
+
+  /* ---------- Open feature buttons ---------- */
+
+  openAccounts(app: TPPApp): void {
     this.router.navigate(['/customer/accounts'], {
       queryParams: { tppAppId: app.tppAppId }
     });
   }
 
-  goToPayments(app: any): void {
+  openPayments(app: TPPApp): void {
     this.router.navigate(['/customer/payment-initiate'], {
       queryParams: { tppAppId: app.tppAppId }
     });
   }
 
-  goToBalance(app: any): void {
+  openFunds(app: TPPApp): void {
     this.router.navigate(['/customer/funds-check'], {
       queryParams: { tppAppId: app.tppAppId }
     });
   }
 
-  parseScopes(s: string): string[] {
-    try { return JSON.parse(s); }
-    catch { return []; }
-  }
-
-  getScopeLabel(scope: string): string {
-    const map: any = {
-      'accounts': 'Accounts',
-      'payments': 'Payments',
-      'funds-confirmations': 'Funds Check',
-      'balances': 'Balance'
-    };
-    return map[scope] || scope;
+  manageConsent(): void {
+    this.router.navigate(['/customer/consents']);
   }
 }
-``

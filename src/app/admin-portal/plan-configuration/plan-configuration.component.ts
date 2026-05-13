@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../core/services/product.service';
-import { APIPlan } from '../../core/models/models';
+import { APIPlan, APIProduct } from '../../core/models/models';
 
 @Component({
   selector: 'app-plan-configuration',
@@ -14,24 +14,37 @@ import { APIPlan } from '../../core/models/models';
         <div>
           <h1><i class="fas fa-sliders-h"></i> Plan Configuration</h1>
           <p class="page-subtitle">
-            Configure rate limits, quotas, SLA & subscription duration
+            Configure rate limits, quotas, SLA & subscription duration per API Product
           </p>
         </div>
-        <button class="btn btn-primary" (click)="startCreate()">
+        <button class="btn btn-primary" (click)="startCreate()" *ngIf="!showForm">
           <i class="fas fa-plus"></i> New Plan
         </button>
       </div>
 
+      <div class="alert alert-success" *ngIf="successMessage">
+        <i class="fas fa-check-circle"></i> {{ successMessage }}
+      </div>
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+      </div>
+
       <!-- CREATE / EDIT FORM -->
       <div class="glass-card mb-20" *ngIf="showForm" style="max-width:560px">
-        <h3 class="mb-16">
-          {{ editingPlan ? 'Edit Plan' : 'Create Plan' }}
-        </h3>
+        <h3 class="mb-16">{{ editingPlan ? 'Edit Plan' : 'Create Plan' }}</h3>
 
+        <!-- Product dropdown -->
         <div class="form-group">
-          <label>Product ID</label>
-          <input type="number" class="form-control"
-                 [(ngModel)]="form.productId">
+          <label>API Product</label>
+          <select class="form-control" [(ngModel)]="form.productId">
+            <option [ngValue]="null" disabled>Choose an API product</option>
+            <option *ngFor="let p of products" [ngValue]="p.productId">
+              {{ p.name }} <span *ngIf="p.status !== 'ACTIVE'">({{ p.status }})</span>
+            </option>
+          </select>
+          <small class="text-muted" *ngIf="products.length === 0">
+            No API products available. Approve a TPP app first to auto-create one.
+          </small>
         </div>
 
         <div class="form-group">
@@ -44,42 +57,40 @@ import { APIPlan } from '../../core/models/models';
 
         <div class="form-group">
           <label>Rate Limit / min</label>
-          <input type="number" class="form-control"
-                 [(ngModel)]="form.rateLimitPerMin">
+          <input type="number" class="form-control" [(ngModel)]="form.rateLimitPerMin">
         </div>
 
         <div class="form-group">
           <label>Daily Quota</label>
-          <input type="number" class="form-control"
-                 [(ngModel)]="form.dailyQuota">
+          <input type="number" class="form-control" [(ngModel)]="form.dailyQuota">
         </div>
 
         <div class="form-group">
-          <label>SLA</label>
-          <input type="number" class="form-control"
-                 [(ngModel)]="form.sla">
+          <label>SLA (%)</label>
+          <input type="number" class="form-control" [(ngModel)]="form.sla">
         </div>
 
         <div class="form-group">
           <label>Duration Value</label>
-          <input type="number" class="form-control"
-                 [(ngModel)]="form.durationValue">
+          <input type="number" class="form-control" [(ngModel)]="form.durationValue">
         </div>
 
         <div class="form-group">
           <label>Duration Unit</label>
-          <select class="form-control"
-                  [(ngModel)]="form.durationUnit">
+          <select class="form-control" [(ngModel)]="form.durationUnit">
             <option value="DAYS">Days</option>
             <option value="MONTHS">Months</option>
             <option value="YEARS">Years</option>
           </select>
         </div>
 
-        <button class="btn btn-success" (click)="save()">
-          {{ editingPlan ? 'Update' : 'Create' }}
-        </button>
-        <button class="btn btn-light ml-8" (click)="cancel()">Cancel</button>
+        <div class="flex gap-8">
+          <button class="btn btn-success" (click)="save()" [disabled]="isSaving">
+            <span *ngIf="!isSaving"><i class="fas fa-check"></i> {{ editingPlan ? 'Update' : 'Create' }}</span>
+            <span *ngIf="isSaving"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+          </button>
+          <button class="btn btn-light" (click)="cancel()" [disabled]="isSaving">Cancel</button>
+        </div>
       </div>
 
       <!-- LOADER -->
@@ -87,21 +98,16 @@ import { APIPlan } from '../../core/models/models';
         <div class="spinner"></div>
       </div>
 
-      <!-- ERROR -->
-      <div class="alert alert-error" *ngIf="errorMessage">
-        <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
-      </div>
-
       <!-- PLANS TABLE -->
       <div class="glass-card" *ngIf="!isLoading">
-        <table class="data-table">
+        <table class="data-table" *ngIf="plans.length > 0">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Product</th>
+              <th>API Product</th>
               <th>Environment</th>
-              <th>Rate</th>
-              <th>Quota</th>
+              <th>Rate/min</th>
+              <th>Daily Quota</th>
               <th>SLA</th>
               <th>Duration</th>
               <th>Actions</th>
@@ -110,20 +116,22 @@ import { APIPlan } from '../../core/models/models';
           <tbody>
             <tr *ngFor="let p of plans">
               <td>#{{ p.planId }}</td>
-              <td>{{ p.apiProduct?.productId }}</td>
-              <td>{{ p.environment }}</td>
+              <td><strong>{{ resolveProductName(p) }}</strong></td>
+              <td>
+                <span class="badge" [ngClass]="p.environment === 'SANDBOX' ? 'badge-sandbox' : 'badge-info'">
+                  {{ p.environment }}
+                </span>
+              </td>
               <td>{{ p.rateLimitPerMin }}</td>
               <td>{{ p.dailyQuota }}</td>
-              <td>{{ p.sla }}</td>
+              <td>{{ p.sla }}%</td>
               <td>{{ p.durationValue }} {{ p.durationUnit }}</td>
               <td>
-                <div class="flex gap-4">
-                  <button class="btn btn-sm btn-secondary"
-                          (click)="edit(p)">
-                    <i class="fas fa-edit"></i> Edit
+                <div class="flex gap-8">
+                  <button class="btn btn-sm btn-secondary" (click)="edit(p)">
+                    <i class="fas fa-pen"></i> Edit
                   </button>
-                  <button class="btn btn-sm btn-danger"
-                          (click)="deletePlan(p)">
+                  <button class="btn btn-sm btn-danger" (click)="deletePlan(p)">
                     <i class="fas fa-trash"></i> Delete
                   </button>
                 </div>
@@ -133,7 +141,8 @@ import { APIPlan } from '../../core/models/models';
         </table>
 
         <div class="empty-state" *ngIf="plans.length === 0">
-          <p>No plans configured</p>
+          <i class="fas fa-sliders-h"></i>
+          <p>No plans configured yet. Click "New Plan" to create one.</p>
         </div>
       </div>
     </div>
@@ -143,54 +152,72 @@ import { APIPlan } from '../../core/models/models';
 export class PlanConfigurationComponent implements OnInit {
 
   plans: APIPlan[] = [];
+  products: APIProduct[] = [];
   isLoading = true;
+  isSaving = false;
   showForm = false;
   errorMessage = '';
+  successMessage = '';
 
   editingPlan: APIPlan | null = null;
 
-  form: any = {
-    productId: 1,
-    environment: 'SANDBOX',
-    rateLimitPerMin: 100,
-    dailyQuota: 1000,
-    sla: 500,
-    durationValue: 1,
-    durationUnit: 'MONTHS'
-  };
+  form: any = this.blankForm();
 
   constructor(private productService: ProductService) {}
 
   ngOnInit(): void {
+    this.loadProducts();
     this.loadPlans();
+  }
+
+  private blankForm() {
+    return {
+      productId: null as number | null,
+      environment: 'SANDBOX',
+      rateLimitPerMin: 100,
+      dailyQuota: 1000,
+      sla: 99,
+      durationValue: 1,
+      durationUnit: 'MONTHS'
+    };
+  }
+
+  loadProducts(): void {
+    this.productService.getProducts().subscribe({
+      next: d => this.products = d || [],
+      error: () => {} // table-level error already covers it
+    });
   }
 
   loadPlans(): void {
     this.isLoading = true;
     this.productService.getPlans().subscribe({
-      next: d => {
-        this.plans = d || [];
-        this.isLoading = false;
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load plans';
-        this.isLoading = false;
-      }
+      next: d => { this.plans = d || []; this.isLoading = false; },
+      error: () => { this.errorMessage = 'Unable to load plans'; this.isLoading = false; }
     });
+  }
+
+  resolveProductName(p: APIPlan): string {
+    if (p.apiProduct?.name) return p.apiProduct.name;
+    const match = this.products.find(prod => prod.productId === p.apiProduct?.productId);
+    return match?.name || `#${p.apiProduct?.productId ?? '?'}`;
   }
 
   startCreate(): void {
     this.editingPlan = null;
-    this.resetForm();
+    this.form = this.blankForm();
+    if (this.products.length > 0 && this.form.productId == null) {
+      this.form.productId = this.products[0].productId;
+    }
+    this.successMessage = '';
+    this.errorMessage = '';
     this.showForm = true;
   }
 
   edit(plan: APIPlan): void {
     this.editingPlan = plan;
-    this.showForm = true;
-
     this.form = {
-      productId: plan.apiProduct?.productId,
+      productId: plan.apiProduct?.productId ?? null,
       environment: plan.environment,
       rateLimitPerMin: plan.rateLimitPerMin,
       dailyQuota: plan.dailyQuota,
@@ -198,67 +225,69 @@ export class PlanConfigurationComponent implements OnInit {
       durationValue: plan.durationValue,
       durationUnit: plan.durationUnit
     };
+    this.successMessage = '';
+    this.errorMessage = '';
+    this.showForm = true;
   }
 
   save(): void {
+    this.errorMessage = '';
+    if (this.form.productId == null) {
+      this.errorMessage = 'Please choose an API product.';
+      return;
+    }
+
+    this.isSaving = true;
     const payload = {
-      ...this.form,
+      environment: this.form.environment,
+      rateLimitPerMin: this.form.rateLimitPerMin,
+      dailyQuota: this.form.dailyQuota,
+      sla: this.form.sla,
+      durationValue: this.form.durationValue,
+      durationUnit: this.form.durationUnit,
       apiProduct: { productId: this.form.productId }
     };
 
-    if (this.editingPlan) {
-      this.productService
-        .updatePlan(this.editingPlan.planId, payload)
-        .subscribe({
-          next: () => {
-            this.loadPlans();
-            this.cancel();
-          },
-          error: err => {
-            this.errorMessage = err?.error?.message || 'Update failed';
-          }
-        });
-    } else {
-      this.productService.createPlan(payload).subscribe({
-        next: () => {
-          this.loadPlans();
-          this.cancel();
-        },
-        error: err => {
-          this.errorMessage = err?.error?.message || 'Duplicate plan not allowed';
-        }
-      });
-    }
+    const request$ = this.editingPlan
+      ? this.productService.updatePlan(this.editingPlan.planId, payload as any)
+      : this.productService.createPlan(payload as any);
+
+    request$.subscribe({
+      next: () => {
+        const productName = this.products.find(p => p.productId === this.form.productId)?.name || 'product';
+        this.successMessage = this.editingPlan
+          ? `Plan updated for "${productName}".`
+          : `Plan created for "${productName}".`;
+        setTimeout(() => (this.successMessage = ''), 3500);
+        this.isSaving = false;
+        this.loadPlans();
+        this.cancel();
+      },
+      error: err => {
+        this.isSaving = false;
+        this.errorMessage = err?.error?.message || (this.editingPlan ? 'Update failed' : 'Create failed');
+      }
+    });
   }
 
   cancel(): void {
     this.showForm = false;
     this.editingPlan = null;
-    this.resetForm();
-  }
-
-  resetForm(): void {
-    this.form = {
-      productId: 1,
-      environment: 'SANDBOX',
-      rateLimitPerMin: 100,
-      dailyQuota: 1000,
-      sla: 500,
-      durationValue: 1,
-      durationUnit: 'MONTHS'
-    };
+    this.form = this.blankForm();
+    this.errorMessage = '';
   }
 
   deletePlan(plan: APIPlan): void {
-    if (confirm(`Are you sure you want to delete plan #${plan.planId}?`)) {
-      this.productService.deletePlan(plan.planId).subscribe({
-        next: () => {
-          this.loadPlans();
-        },
-        error: err => {
-          this.errorMessage = err?.error?.message || 'Delete failed';
-        }
-      });
-    }
+    if (!confirm(`Delete plan #${plan.planId}?`)) return;
+    this.productService.deletePlan(plan.planId).subscribe({
+      next: () => {
+        this.successMessage = `Plan #${plan.planId} deleted.`;
+        setTimeout(() => (this.successMessage = ''), 3500);
+        this.loadPlans();
+      },
+      error: err => {
+        this.errorMessage = err?.error?.message || 'Delete failed';
+      }
+    });
   }
 }

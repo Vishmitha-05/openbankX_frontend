@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/developer-portal/app-list/app-list.component.css"],
+  "sourcesContent": [".app-card { animation: fadeInUp 0.4s ease both; }\r\n.app-card-header { display: flex; justify-content: space-between; align-items: flex-start; }\r\n.app-icon {\r\n  width: 42px; height: 42px; border-radius: 10px;\r\n  display: flex; align-items: center; justify-content: center;\r\n  color: #fff; font-size: 1.1rem;\r\n}\r\n.app-scopes { display: flex; flex-wrap: wrap; gap: 4px; }\r\n.app-actions { display: flex; gap: 8px; }\r\n"],
+  "mappings": ";AAAA,CAAC;AAAW,aAAW,SAAS,KAAK,KAAK;AAAM;AAChD,CAAC;AAAkB,WAAS;AAAM,mBAAiB;AAAe,eAAa;AAAY;AAC3F,CAAC;AACC,SAAO;AAAM,UAAQ;AAAM,iBAAe;AAC1C,WAAS;AAAM,eAAa;AAAQ,mBAAiB;AACrD,SAAO;AAAM,aAAW;AAC1B;AACA,CAAC;AAAa,WAAS;AAAM,aAAW;AAAM,OAAK;AAAK;AACxD,CAAC;AAAc,WAAS;AAAM,OAAK;AAAK;",
+  "names": []
+}

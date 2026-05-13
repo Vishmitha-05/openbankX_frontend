@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/admin-portal/user-management/user-management.component.css"],
+  "sourcesContent": ["/* Button spacing for actions */\r\n.btn + .btn {\r\n  margin-left: 8px;\r\n}\r\n"],
+  "mappings": ";AACA,CAAC,IAAI,EAAE,CAAN;AACC,eAAa;AACf;",
+  "names": []
+}
