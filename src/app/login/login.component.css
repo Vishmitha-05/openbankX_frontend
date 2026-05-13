@@ -90,28 +90,6 @@
   background: #fff;
 }
 
-.label-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.label-row label {
-  margin-bottom: 0;
-}
-
-.forgot-link {
-  font-size: 0.75rem;
-  color: #1e40af;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.forgot-link:hover {
-  text-decoration: underline;
-}
-
 .input-icon {
   position: relative;
 }

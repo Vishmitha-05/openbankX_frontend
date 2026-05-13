@@ -14,12 +14,6 @@ export const routes: Routes = [
     loadComponent: () => import('./register/register.component').then(m => m.RegisterComponent)
   },
 
-  // Forgot password — public route
-  {
-    path: 'forgot-password',
-    loadComponent: () => import('./forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
-  },
-
   // ========== Portal 1: Developer (TPP) ==========
   {
     path: 'developer',

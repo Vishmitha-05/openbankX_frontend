@@ -9,8 +9,8 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
-  template: `<router-outlet></router-outlet>`,
-  styles: [`:host { display: block; min-height: 100vh; }`]
+  templateUrl: './app.html',
+  styleUrl: './app.css',
 })
 export class AppComponent {
   title = 'OpenBankX';

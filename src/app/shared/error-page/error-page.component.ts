@@ -6,19 +6,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
   selector: 'app-error-page',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  template: `
-    <div class="error-wrapper">
-      <div class="error-card">
-        <div class="error-code" [ngStyle]="{ 'color': getColor() }">{{ code }}</div>
-        <h2>{{ getTitle() }}</h2>
-        <p class="error-desc">{{ getDescription() }}</p>
-        <div class="error-icon">
-          <i [class]="getIcon()" [ngStyle]="{ 'color': getColor() }"></i>
-        </div>
-        <a routerLink="/login" class="btn btn-primary"><i class="fas fa-home"></i> Return to Login</a>
-      </div>
-    </div>
-  `,
+  templateUrl: './error-page.component.html',
   styleUrl: './error-page.component.css'
 })
 export class ErrorPageComponent {

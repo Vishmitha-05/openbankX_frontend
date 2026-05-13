@@ -9,63 +9,7 @@ import { AppStats, TPPApp } from '../../core/models/models';
   selector: 'app-usage-analytics',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="page-content">
-      <div class="page-header">
-        <div>
-          <h1><i class="fas fa-chart-bar"></i> Usage Analytics</h1>
-          <p class="page-subtitle">API call statistics for your applications</p>
-        </div>
-
-        <div *ngIf="apps.length > 1">
-          <select class="form-control" [(ngModel)]="selectedAppId" (change)="loadStats()">
-            <option *ngFor="let a of apps" [value]="a.tppAppId">{{ a.appName }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="loading-container" *ngIf="isLoading">
-        <div class="spinner"></div>
-        <span>Loading analytics...</span>
-      </div>
-
-      <div class="alert alert-error" *ngIf="errorMessage">
-        <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
-      </div>
-
-      <div class="empty-state" *ngIf="!isLoading && apps.length === 0 && !errorMessage">
-        <i class="fas fa-cube"></i>
-        <p>You have no applications yet. Register an app to see analytics.</p>
-      </div>
-
-      <div *ngIf="!isLoading && apps.length > 0">
-        <div class="grid-4 mb-20">
-          <div *ngFor="let stat of statCards" class="stat-card">
-            <div class="stat-icon" [ngStyle]="{ 'background': stat.gradient }">
-              <i [class]="stat.icon"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">{{ stat.value }}</div>
-              <div class="stat-label">{{ stat.label }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="glass-card">
-          <h3 class="mb-16">API Calls Distribution</h3>
-          <div class="bar-chart">
-            <div *ngFor="let bar of barData" class="bar-item">
-              <div class="bar-label text-sm">{{ bar.label }}</div>
-              <div class="bar-track">
-                <div class="bar-fill" [ngStyle]="{ 'width': bar.percent + '%', 'background': bar.color }"></div>
-              </div>
-              <div class="bar-value text-sm text-muted">{{ bar.value }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './usage-analytics.component.html',
   styleUrl: './usage-analytics.component.css'
 })
 export class UsageAnalyticsComponent implements OnInit {

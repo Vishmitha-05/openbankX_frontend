@@ -1,0 +1,59 @@
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <h1><i class="fas fa-lock"></i> SCA Policy Configuration</h1>
+          <p class="page-subtitle">Define which scopes require Strong Customer Authentication</p>
+        </div>
+      </div>
+
+      <div class="alert alert-success" *ngIf="saveMessage">
+        <i class="fas fa-check-circle"></i> {{ saveMessage }}
+      </div>
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+      </div>
+
+      <div class="glass-card" style="max-width:580px">
+        <h3 class="mb-16">Scope-level SCA Requirements</h3>
+        <div *ngFor="let policy of scaPolicies" class="policy-item">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="scope-pill">{{ policy.scope }}</span>
+              <span class="text-sm text-muted" style="margin-left:8px">{{ policy.description }}</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="policy.requiresSca">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <h3 class="mb-16">SCA Methods Allowed</h3>
+        <div *ngFor="let method of scaMethods" class="policy-item">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-8">
+              <i [class]="method.icon"
+                 [ngStyle]="{ 'color': method.enabled ? '#16a34a' : 'var(--text-muted)' }"></i>
+              <span>{{ method.label }}</span>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="method.enabled">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-8 mt-24">
+          <button class="btn btn-primary" (click)="savePolicy()" [disabled]="isSaving">
+            <span *ngIf="!isSaving"><i class="fas fa-save"></i> Save Policy</span>
+            <span *ngIf="isSaving"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+          </button>
+          <span class="text-sm text-muted" *ngIf="lastSavedAt">
+            Last saved {{ lastSavedAt | date:'medium' }} ({{ savedLocation }})
+          </span>
+        </div>
+      </div>
+    </div>
+  

@@ -46,96 +46,91 @@ var routes = [
   // Login — public route
   {
     path: "login",
-    loadComponent: () => import("./chunk-6PGK2FZG.js").then((m) => m.LoginComponent)
+    loadComponent: () => import("./chunk-ZINZW7GC.js").then((m) => m.LoginComponent)
   },
   // Register — public route
   {
     path: "register",
-    loadComponent: () => import("./chunk-OKYXGVBF.js").then((m) => m.RegisterComponent)
-  },
-  // Forgot password — public route
-  {
-    path: "forgot-password",
-    loadComponent: () => import("./chunk-MYBVU4UI.js").then((m) => m.ForgotPasswordComponent)
+    loadComponent: () => import("./chunk-JHWRZFAY.js").then((m) => m.RegisterComponent)
   },
   // ========== Portal 1: Developer (TPP) ==========
   {
     path: "developer",
-    loadComponent: () => import("./chunk-YJ5HGQNU.js").then((m) => m.DeveloperPortalComponent),
+    loadComponent: () => import("./chunk-WDGUQ3DR.js").then((m) => m.DeveloperPortalComponent),
     canActivate: [authGuard],
     data: { role: "TPP" },
     children: [
-      { path: "dashboard", loadComponent: () => import("./chunk-C7CKFEPX.js").then((m) => m.DashboardComponent) },
-      { path: "apps", loadComponent: () => import("./chunk-LCQMRPBF.js").then((m) => m.AppListComponent) },
-      { path: "apps/new", loadComponent: () => import("./chunk-I3UBUDEJ.js").then((m) => m.AppRegistrationComponent) },
-      { path: "apps/:id/keys", loadComponent: () => import("./chunk-B634Z3EE.js").then((m) => m.KeysUploadComponent) },
+      { path: "dashboard", loadComponent: () => import("./chunk-XRXKKGP6.js").then((m) => m.DashboardComponent) },
+      { path: "apps", loadComponent: () => import("./chunk-G25YVIRZ.js").then((m) => m.AppListComponent) },
+      { path: "apps/new", loadComponent: () => import("./chunk-SYVBMOB7.js").then((m) => m.AppRegistrationComponent) },
+      { path: "apps/:id/keys", loadComponent: () => import("./chunk-TKXLMNN4.js").then((m) => m.KeysUploadComponent) },
       { path: "tpp-register", loadComponent: () => import("./chunk-MXVPWUNQ.js").then((m) => m.TppRegistrationComponent) },
-      { path: "subscribe", loadComponent: () => import("./chunk-KQHGHOW5.js").then((m) => m.SubscriptionPlanComponent) },
-      { path: "sandbox", loadComponent: () => import("./chunk-E4A5NC3I.js").then((m) => m.SandboxExplorerComponent) },
-      { path: "analytics", loadComponent: () => import("./chunk-FGLM3YTD.js").then((m) => m.UsageAnalyticsComponent) },
+      { path: "subscribe", loadComponent: () => import("./chunk-X3LM3R42.js").then((m) => m.SubscriptionPlanComponent) },
+      { path: "sandbox", loadComponent: () => import("./chunk-6U5JRROW.js").then((m) => m.SandboxExplorerComponent) },
+      { path: "analytics", loadComponent: () => import("./chunk-42PFVCBO.js").then((m) => m.UsageAnalyticsComponent) },
       { path: "", redirectTo: "dashboard", pathMatch: "full" }
     ]
   },
   // ========== Portal 2: Customer ==========
   {
     path: "customer",
-    loadComponent: () => import("./chunk-R5TPY4DI.js").then((m) => m.CustomerPortalComponent),
+    loadComponent: () => import("./chunk-4Q4ETTZP.js").then((m) => m.CustomerPortalComponent),
     canActivate: [authGuard],
     data: { role: "CUSTOMER" },
     children: [
-      { path: "apps", loadComponent: () => import("./chunk-3AINCKXH.js").then((m) => m.AppBrowserComponent) },
-      { path: "consents", loadComponent: () => import("./chunk-CLL3GEDY.js").then((m) => m.MyConsentsComponent) },
-      { path: "consents/:id", loadComponent: () => import("./chunk-ESFWDD5H.js").then((m) => m.ConsentDetailComponent) },
+      { path: "apps", loadComponent: () => import("./chunk-5BX5IZGI.js").then((m) => m.AppBrowserComponent) },
+      { path: "consents", loadComponent: () => import("./chunk-RQXRS7XH.js").then((m) => m.MyConsentsComponent) },
+      { path: "consents/:id", loadComponent: () => import("./chunk-3OUETSOA.js").then((m) => m.ConsentDetailComponent) },
       // Review-consent functionality is now folded into the My Consents page.
       // Legacy path redirects so existing links don't 404.
       { path: "consent-review", redirectTo: "consents", pathMatch: "full" },
-      { path: "sca", loadComponent: () => import("./chunk-NI4MEQBD.js").then((m) => m.ScaVerifyComponent) },
-      { path: "accounts", loadComponent: () => import("./chunk-LLAGZAVL.js").then((m) => m.MyAccountsComponent) },
-      { path: "payment-initiate", loadComponent: () => import("./chunk-AR2HS2TC.js").then((m) => m.InitiatePaymentComponent) },
-      { path: "funds-check", loadComponent: () => import("./chunk-A3TOOF6V.js").then((m) => m.FundsCheckComponent) },
+      { path: "sca", loadComponent: () => import("./chunk-PE3Q6PK2.js").then((m) => m.ScaVerifyComponent) },
+      { path: "accounts", loadComponent: () => import("./chunk-Q4J2TRS2.js").then((m) => m.MyAccountsComponent) },
+      { path: "payment-initiate", loadComponent: () => import("./chunk-VPIQO3F7.js").then((m) => m.InitiatePaymentComponent) },
+      { path: "funds-check", loadComponent: () => import("./chunk-L5V3FSYI.js").then((m) => m.FundsCheckComponent) },
       { path: "", redirectTo: "apps", pathMatch: "full" }
     ]
   },
   // ========== Portal 3: Operations ==========
   {
     path: "operations",
-    loadComponent: () => import("./chunk-Z3N2AGX5.js").then((m) => m.OperationsPortalComponent),
+    loadComponent: () => import("./chunk-TWG3DFHG.js").then((m) => m.OperationsPortalComponent),
     canActivate: [authGuard],
     data: { role: "OPERATIONS" },
     children: [
-      { path: "health", loadComponent: () => import("./chunk-OGLUOO33.js").then((m) => m.ApiHealthComponent) },
-      { path: "throttle-log", loadComponent: () => import("./chunk-QH7H2FX2.js").then((m) => m.ThrottleLogComponent) },
-      { path: "incidents", loadComponent: () => import("./chunk-SZ6GORGA.js").then((m) => m.IncidentManagementComponent) },
-      { path: "latency", loadComponent: () => import("./chunk-UIKMHHMF.js").then((m) => m.LatencyChartsComponent) },
+      { path: "health", loadComponent: () => import("./chunk-5ZLQWHK6.js").then((m) => m.ApiHealthComponent) },
+      { path: "throttle-log", loadComponent: () => import("./chunk-THTFBJOS.js").then((m) => m.ThrottleLogComponent) },
+      { path: "incidents", loadComponent: () => import("./chunk-SRYMQR5H.js").then((m) => m.IncidentManagementComponent) },
+      { path: "latency", loadComponent: () => import("./chunk-GFUZKMCU.js").then((m) => m.LatencyChartsComponent) },
       { path: "", redirectTo: "health", pathMatch: "full" }
     ]
   },
   // ========== Portal 4: Compliance (also accessible by OPERATIONS) ==========
   {
     path: "compliance",
-    loadComponent: () => import("./chunk-MQFFMFZB.js").then((m) => m.CompliancePortalComponent),
+    loadComponent: () => import("./chunk-XOBANDZE.js").then((m) => m.CompliancePortalComponent),
     canActivate: [authGuard],
     data: { role: "OPERATIONS" },
     children: [
-      { path: "consents", loadComponent: () => import("./chunk-I76IARW6.js").then((m) => m.ConsentRegistryComponent) },
-      { path: "sca", loadComponent: () => import("./chunk-SIQ4VAZD.js").then((m) => m.ScaStatisticsComponent) },
-      { path: "audit", loadComponent: () => import("./chunk-P4IIPMMX.js").then((m) => m.AuditTrailComponent) },
-      { path: "reports", loadComponent: () => import("./chunk-YFUNTJYZ.js").then((m) => m.ReportGenerationComponent) },
+      { path: "consents", loadComponent: () => import("./chunk-CDRNS5KK.js").then((m) => m.ConsentRegistryComponent) },
+      { path: "sca", loadComponent: () => import("./chunk-NHAKRHME.js").then((m) => m.ScaStatisticsComponent) },
+      { path: "audit", loadComponent: () => import("./chunk-C3IENJYN.js").then((m) => m.AuditTrailComponent) },
+      { path: "reports", loadComponent: () => import("./chunk-IUPN5REN.js").then((m) => m.ReportGenerationComponent) },
       { path: "", redirectTo: "consents", pathMatch: "full" }
     ]
   },
   // ========== Portal 5: Admin ==========
   {
     path: "admin",
-    loadComponent: () => import("./chunk-W25B6GJ3.js").then((m) => m.AdminPortalComponent),
+    loadComponent: () => import("./chunk-5BLGOZNP.js").then((m) => m.AdminPortalComponent),
     canActivate: [authGuard],
     data: { role: "ADMIN" },
     children: [
-      { path: "products", loadComponent: () => import("./chunk-PM6B4BDY.js").then((m) => m.ProductManagementComponent) },
-      { path: "plans", loadComponent: () => import("./chunk-VMDMQ6DR.js").then((m) => m.PlanConfigurationComponent) },
-      { path: "users", loadComponent: () => import("./chunk-RJAJG6SS.js").then((m) => m.UserManagementComponent) },
-      { path: "tpp", loadComponent: () => import("./chunk-73MU5J4Z.js").then((m) => m.TppManagementComponent) },
-      { path: "sca-policy", loadComponent: () => import("./chunk-3Y546HAD.js").then((m) => m.ScaPolicyComponent) },
+      { path: "products", loadComponent: () => import("./chunk-EHPMTL3J.js").then((m) => m.ProductManagementComponent) },
+      { path: "plans", loadComponent: () => import("./chunk-YYZEZXPL.js").then((m) => m.PlanConfigurationComponent) },
+      { path: "users", loadComponent: () => import("./chunk-WBTQ7RJG.js").then((m) => m.UserManagementComponent) },
+      { path: "tpp", loadComponent: () => import("./chunk-DMT3T75C.js").then((m) => m.TppManagementComponent) },
+      { path: "sca-policy", loadComponent: () => import("./chunk-PPS4QHAG.js").then((m) => m.ScaPolicyComponent) },
       { path: "", redirectTo: "products", pathMatch: "full" }
     ]
   },
@@ -149,7 +144,7 @@ var routes = [
   // ========== Error Page ==========
   {
     path: "error",
-    loadComponent: () => import("./chunk-ZI77YFIX.js").then((m) => m.ErrorPageComponent)
+    loadComponent: () => import("./chunk-HA34ZZ34.js").then((m) => m.ErrorPageComponent)
   },
   // Default redirects
   { path: "", redirectTo: "/login", pathMatch: "full" },
@@ -201,7 +196,7 @@ var AppComponent = class _AppComponent {
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AppComponent, [{
     type: Component,
-    args: [{ selector: "app-root", standalone: true, imports: [RouterOutlet], template: `<router-outlet></router-outlet>`, styles: ["/* angular:styles/component:css;b12e85be7d455115f6d554170e92b6088ef37ef9bf708b0eae91cd65079b1ecd;C:/Users/2478956/OneDrive - Cognizant/Desktop/OpenBankX_Project/openbankX_frontend/src/app/app.ts */\n:host {\n  display: block;\n  min-height: 100vh;\n}\n/*# sourceMappingURL=app.css.map */\n"] }]
+    args: [{ selector: "app-root", standalone: true, imports: [RouterOutlet], template: "<router-outlet></router-outlet>", styles: ["/* src/app/app.css */\n:host {\n  display: block;\n  min-height: 100vh;\n}\n/*# sourceMappingURL=app.css.map */\n"] }]
   }], null, null);
 })();
 (() => {

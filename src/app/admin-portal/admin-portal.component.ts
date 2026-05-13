@@ -8,15 +8,7 @@ import { NavbarComponent } from '../shared/navbar/navbar.component';
   selector: 'app-admin-portal',
   standalone: true,
   imports: [CommonModule, RouterModule, SidebarComponent, NavbarComponent],
-  template: `
-    <div class="portal-layout">
-      <app-sidebar></app-sidebar>
-      <div class="portal-main">
-        <app-navbar [pageTitle]="'Admin Console'"></app-navbar>
-        <div class="portal-content"><router-outlet></router-outlet></div>
-      </div>
-    </div>
-  `,
+  templateUrl: './admin-portal.component.html',
   styleUrl: './admin-portal.component.css'
 })
 export class AdminPortalComponent {}

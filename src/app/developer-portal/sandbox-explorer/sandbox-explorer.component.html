@@ -1,0 +1,54 @@
+    <div class="page-content">
+      <div class="page-header">
+        <div>
+          <h1><i class="fas fa-flask"></i> Sandbox Explorer</h1>
+          <p class="page-subtitle">Test Open Banking APIs with live requests</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Request Panel -->
+        <div class="glass-card">
+          <h3 class="mb-16">Request</h3>
+          <div class="form-group">
+            <label>HTTP Method</label>
+            <select class="form-control" [(ngModel)]="method">
+              <option *ngFor="let m of methods" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Endpoint</label>
+            <select class="form-control" [(ngModel)]="endpoint">
+              <option *ngFor="let ep of endpoints" [value]="ep.path">{{ ep.label }}</option>
+            </select>
+          </div>
+          <div class="form-group" *ngIf="method === 'POST'">
+            <label>Request Body (JSON)</label>
+            <textarea class="form-control font-mono" [(ngModel)]="requestBody" rows="6"></textarea>
+          </div>
+          <button class="btn btn-primary" (click)="sendRequest()" [disabled]="isSending">
+            <span *ngIf="!isSending"><i class="fas fa-paper-plane"></i> Send Request</span>
+            <span *ngIf="isSending"><i class="fas fa-spinner fa-spin"></i> Sending...</span>
+          </button>
+        </div>
+
+        <!-- Response Panel -->
+        <div class="glass-card">
+          <div class="flex items-center justify-between mb-16">
+            <h3>Response</h3>
+            <span *ngIf="statusCode" class="badge" [ngClass]="statusCode < 400 ? 'badge-active' : 'badge-revoked'">
+              {{ statusCode }}
+            </span>
+          </div>
+          <div *ngIf="!responseData" class="empty-state">
+            <i class="fas fa-arrow-left"></i>
+            <p>Send a request to see the response</p>
+          </div>
+          <pre *ngIf="responseData" class="response-pre font-mono">{{ responseData }}</pre>
+          <div class="alert alert-error mt-12" *ngIf="responseError">
+            <i class="fas fa-times-circle"></i> {{ responseError }}
+          </div>
+        </div>
+      </div>
+    </div>
+  

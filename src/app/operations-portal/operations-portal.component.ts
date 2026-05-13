@@ -8,15 +8,7 @@ import { NavbarComponent } from '../shared/navbar/navbar.component';
   selector: 'app-operations-portal',
   standalone: true,
   imports: [CommonModule, RouterModule, SidebarComponent, NavbarComponent],
-  template: `
-    <div class="portal-layout">
-      <app-sidebar></app-sidebar>
-      <div class="portal-main">
-        <app-navbar [pageTitle]="'Operations Dashboard'"></app-navbar>
-        <div class="portal-content"><router-outlet></router-outlet></div>
-      </div>
-    </div>
-  `,
+  templateUrl: './operations-portal.component.html',
   styleUrl: './operations-portal.component.css'
 })
 export class OperationsPortalComponent {}

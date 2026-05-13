@@ -1,0 +1,35 @@
+    <div class="page-content">
+      <div class="page-header"><div><h1><i class="fas fa-file-alt"></i> Compliance Reports</h1>
+        <p class="page-subtitle">Generate, view, and download regulatory compliance reports</p></div>
+      </div>
+      <div class="glass-card mb-20" style="max-width:480px">
+        <h3 class="mb-16">Generate New Report</h3>
+        <div class="form-group"><label>Report Scope</label>
+          <input type="text" class="form-control" [(ngModel)]="scope" placeholder="e.g., TPP-1 Q1 2026">
+        </div>
+        <button class="btn btn-primary" (click)="generate()"><i class="fas fa-file-export"></i> Generate Report</button>
+        <div class="alert alert-success mt-12" *ngIf="generated"><i class="fas fa-check-circle"></i> Report generated!</div>
+        <div class="alert alert-error mt-12" *ngIf="errorMessage"><i class="fas fa-exclamation-circle"></i> {{ errorMessage }}</div>
+      </div>
+      <div class="glass-card">
+        <h3 class="mb-16">Existing Reports</h3>
+        <div class="loading-container" *ngIf="isLoading"><div class="spinner"></div></div>
+        <table class="data-table" *ngIf="!isLoading && reports.length > 0">
+          <thead><tr><th>ID</th><th>Scope</th><th>Generated</th><th>Metrics</th><th>Download</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let r of reports">
+              <td class="font-mono">#{{ r.compReportId }}</td>
+              <td>{{ r.scope }}</td>
+              <td class="text-sm">{{ r.generatedDate | date:'medium' }}</td>
+              <td class="text-sm font-mono">{{ r.metrics }}</td>
+              <td>
+                <button class="btn btn-secondary btn-xs" (click)="downloadCSV(r)" title="Download CSV"><i class="fas fa-file-csv"></i> CSV</button>
+                <button class="btn btn-primary btn-xs ml-4" (click)="downloadPDF(r)" title="Download PDF"><i class="fas fa-file-pdf"></i> PDF</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="empty-state" *ngIf="!isLoading && reports.length === 0"><p>No reports generated yet</p></div>
+      </div>
+    </div>
+  
