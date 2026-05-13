@@ -83,13 +83,34 @@ export class ApiHealthComponent implements OnInit {
 
   constructor(private monitoringService: MonitoringService) {}
 
+  /** Latency above this (ms) is considered a throttled/slow call and is
+   *  excluded from the API Health activity feed. */
+  private readonly SLOW_THRESHOLD_MS = 3000;
+
+  /** Every TPP-API row we got from the backend — used for the health metrics. */
+  private allLogs: APILog[] = [];
+
   ngOnInit(): void {
     // Load gateway logs
     this.monitoringService.getGatewayLogs().subscribe({
       next: (logs) => {
-        this.logs = (logs || []).sort((a, b) =>
+        // First keep only the customer-facing TPP API calls.
+        // Internal traffic (notifications poll, admin calls, etc.) is filtered
+        // out so the page reflects how the apps' published APIs are doing.
+        const tppOnly = (logs || []).filter(l => this.isTppApiEndpoint(l.endpoint));
+
+        this.allLogs = tppOnly.sort((a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
+
+        // API Health activity feed = only the successful, fast traffic.
+        // Failed / throttled / slow calls live on the Throttle Log page.
+        this.logs = this.allLogs.filter(l =>
+          l.statusCode < 400 &&
+          l.statusCode !== 429 &&
+          (l.latencyMs ?? 0) <= this.SLOW_THRESHOLD_MS
+        );
+
         this.calculateMetrics();
         this.isLoading = false;
       },
@@ -116,15 +137,28 @@ export class ApiHealthComponent implements OnInit {
       || '';
   }
 
-  private calculateMetrics(): void {
-    if (this.logs.length === 0) return;
-    this.metrics[0].value = this.logs.length.toString();
+  /** True only for the customer-facing AISP / PISP / CBPII endpoints. */
+  private isTppApiEndpoint(uri?: string): boolean {
+    if (!uri) return false;
+    return uri.startsWith('/api/v1/aisp/')
+        || uri.startsWith('/api/v1/pisp/')
+        || uri.startsWith('/api/v1/cbpii/');
+  }
 
-    const avgLatency = this.logs.reduce((sum, l) => sum + (l.latencyMs || 0), 0) / this.logs.length;
+  /**
+   * Metrics are computed from the *full* log set (healthy + throttled +
+   * failed), so the headline cards reflect the real system health, not just
+   * the subset shown in the table below.
+   */
+  private calculateMetrics(): void {
+    if (this.allLogs.length === 0) return;
+    this.metrics[0].value = this.allLogs.length.toString();
+
+    const avgLatency = this.allLogs.reduce((sum, l) => sum + (l.latencyMs || 0), 0) / this.allLogs.length;
     this.metrics[1].value = Math.round(avgLatency) + 'ms';
 
-    const errors = this.logs.filter(l => l.statusCode >= 400).length;
-    const errorRate = ((errors / this.logs.length) * 100).toFixed(1);
+    const errors = this.allLogs.filter(l => l.statusCode >= 400).length;
+    const errorRate = ((errors / this.allLogs.length) * 100).toFixed(1);
     this.metrics[2].value = errorRate + '%';
   }
 }

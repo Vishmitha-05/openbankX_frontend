@@ -6,7 +6,13 @@
       "Read(//c/Users/2478956/OneDrive - Cognizant/Desktop/OpenBankX_Project/frontend_backend/OpenBankX_Backend 1/**)",
       "Bash(./mvnw.cmd -q -DskipTests compile)",
       "PowerShell($resolved = \\(Get-Item 'C:\\\\Program Files\\\\Common Files\\\\Oracle\\\\Java\\\\javapath\\\\java.exe'\\).Target; $resolved)",
-      "PowerShell($real = \\(Get-Item 'C:\\\\Program Files\\\\Common Files\\\\Oracle\\\\Java\\\\javapath_target_347698609\\\\java.exe'\\).Target; $real)"
+      "PowerShell($real = \\(Get-Item 'C:\\\\Program Files\\\\Common Files\\\\Oracle\\\\Java\\\\javapath_target_347698609\\\\java.exe'\\).Target; $real)",
+      "PowerShell($conn = Get-NetTCPConnection -LocalPort 8081 -State Listen -ErrorAction SilentlyContinue; if \\($conn\\) { foreach \\($c in $conn\\) { try { Stop-Process -Id $c.OwningProcess -Force -ErrorAction Stop; \"Killed PID $\\($c.OwningProcess\\)\" } catch { try { & taskkill /F /PID $c.OwningProcess 2>$null; \"taskkilled $\\($c.OwningProcess\\)\" } catch { \"Could not kill PID $\\($c.OwningProcess\\)\" } } } } else { 'Nothing on 8081' }; Start-Sleep -Seconds 3; if \\(Get-NetTCPConnection -LocalPort 8081 -State Listen -ErrorAction SilentlyContinue\\) { 'STILL UP' } else { 'PORT 8081 FREE' })",
+      "PowerShell(Get-NetTCPConnection -LocalPort 8081 -State Listen -ErrorAction SilentlyContinue | Select-Object LocalPort, OwningProcess; if \\(-not \\(Get-NetTCPConnection -LocalPort 8081 -State Listen -ErrorAction SilentlyContinue\\)\\) { 'PORT 8081 FREE' })",
+      "Bash(netstat -ano)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\2478956\\OneDrive - Cognizant\\Desktop\\OpenBankX_Project\\frontend_backend\\OpenBankX_Backend 1\\src\\main\\java\\com\\cts\\openbankx\\controller"
     ]
   }
 }

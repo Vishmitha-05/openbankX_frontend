@@ -8,7 +8,7 @@ import { AuditTrail, ComplianceReport } from '../models/models';
  * AuditService — Audit trails and compliance reports.
  *
  * Maps to:
- *   GET  /audit-trails          → Search audit records (NOTE: path is /api/audit-trails, not /api/v1/)
+ *   GET  /audit-trails          → Search audit records
  *   GET  /compliance/reports    → List compliance reports
  *   POST /compliance/reports    → Generate a new report
  */
@@ -20,8 +20,7 @@ export class AuditService {
   constructor(private http: HttpClient) {}
 
   getAuditTrails(): Observable<AuditTrail[]> {
-    // AuditTrailController is on /api/audit-trails (no /v1 prefix)
-    return this.http.get<AuditTrail[]>('/api/audit-trails');
+    return this.http.get<AuditTrail[]>(`${this.apiUrl}/audit-trails`);
   }
 
   getComplianceReports(): Observable<ComplianceReport[]> {

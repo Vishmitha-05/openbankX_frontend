@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "sources": ["angular:styles/component:css;b12e85be7d455115f6d554170e92b6088ef37ef9bf708b0eae91cd65079b1ecd;c:/Users/2478956/OneDrive - Cognizant/Desktop/OpenBankX_Project/openbankX_frontend/src/app/app.ts"],
+  "sources": ["angular:styles/component:css;b12e85be7d455115f6d554170e92b6088ef37ef9bf708b0eae91cd65079b1ecd;C:/Users/2478956/OneDrive - Cognizant/Desktop/OpenBankX_Project/openbankX_frontend/src/app/app.ts"],
   "sourcesContent": [":host { display: block; min-height: 100vh; }"],
   "mappings": ";AAAA;AAAQ,WAAS;AAAO,cAAY;AAAO;",
   "names": []

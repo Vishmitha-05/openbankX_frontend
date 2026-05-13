@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TppService } from '../../core/services/tpp.service';
-import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-tpp-registration',
@@ -12,9 +11,10 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './tpp-registration.component.html',
   styleUrl: './tpp-registration.component.css'
 })
-export class TppRegistrationComponent implements OnInit {
+export class TppRegistrationComponent {
   legalName = '';
   registrationNumber = '';
+  /** Free-form contact email. Optional — left blank means "use my login email". */
   contactInfo = '';
   certificationRef = '';
   isSubmitting = false;
@@ -23,27 +23,30 @@ export class TppRegistrationComponent implements OnInit {
 
   constructor(
     private tppService: TppService,
-    private router: Router,
-    private authService: AuthService
+    private router: Router
   ) {}
-
-  ngOnInit(): void {
-    // Tie this TPP company to the logged-in developer's account
-    this.contactInfo = this.authService.getEmail();
-  }
 
   register(): void {
     this.errorMessage = '';
     this.successMessage = '';
-    if (!this.legalName || !this.registrationNumber) {
-      this.errorMessage = 'Legal name and registration number are required.';
+
+    if (!this.legalName) {
+      this.errorMessage = 'Legal company name is required.';
       return;
     }
-    // Always overwrite contactInfo with the logged-in user's email so we can
-    // correctly attribute TPP companies (and downstream apps) to this account.
-    const ownerEmail = this.authService.getEmail();
-    if (!ownerEmail) {
-      this.errorMessage = 'Your session has expired. Please sign in again.';
+    if (!this.registrationNumber) {
+      this.errorMessage = 'Registration number is required.';
+      return;
+    }
+
+    const contact = (this.contactInfo || '').trim();
+    if (!contact) {
+      this.errorMessage = 'Contact email is required.';
+      return;
+    }
+    // Basic shape check so we don't store nonsense.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) {
+      this.errorMessage = 'Please enter a valid contact email.';
       return;
     }
 
@@ -51,7 +54,7 @@ export class TppRegistrationComponent implements OnInit {
     this.tppService.registerTpp({
       legalName: this.legalName,
       registrationNumber: this.registrationNumber,
-      contactInfo: ownerEmail,
+      contactInfo: contact,
       certificationRef: this.certificationRef || 'CERT-' + Date.now(),
       status: 'SANDBOX'
     }).subscribe({
