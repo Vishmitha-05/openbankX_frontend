@@ -4,12 +4,28 @@
       </div>
       <div class="glass-card mb-20" style="max-width:480px">
         <h3 class="mb-16">Generate New Report</h3>
-        <div class="form-group"><label>Report Scope</label>
-          <input type="text" class="form-control" [(ngModel)]="scope" placeholder="e.g., TPP-1 Q1 2026">
-        </div>
-        <button class="btn btn-primary" (click)="generate()"><i class="fas fa-file-export"></i> Generate Report</button>
-        <div class="alert alert-success mt-12" *ngIf="generated"><i class="fas fa-check-circle"></i> Report generated!</div>
-        <div class="alert alert-error mt-12" *ngIf="errorMessage"><i class="fas fa-exclamation-circle"></i> {{ errorMessage }}</div>
+        <form #reportForm="ngForm" (ngSubmit)="generate()" novalidate>
+          <div class="form-group">
+            <label>Report Scope <span class="required-asterisk">*</span></label>
+            <input type="text" class="form-control"
+                   name="scope"
+                   [(ngModel)]="scope"
+                   placeholder="e.g., TPP-1 Q1 2026"
+                   #scopeRef="ngModel"
+                   required
+                   minlength="3"
+                   maxlength="120">
+            <small class="field-error" *ngIf="scopeRef.invalid && (scopeRef.touched || reportForm.submitted)">
+              <i class="fas fa-exclamation-circle"></i>
+              <span *ngIf="scopeRef.errors?.['required']">Report scope is required.</span>
+              <span *ngIf="scopeRef.errors?.['minlength']">Scope must be at least 3 characters.</span>
+              <span *ngIf="scopeRef.errors?.['maxlength']">Scope is too long.</span>
+            </small>
+          </div>
+          <button type="submit" class="btn btn-primary"><i class="fas fa-file-export"></i> Generate Report</button>
+          <div class="alert alert-success mt-12" *ngIf="generated"><i class="fas fa-check-circle"></i> Report generated!</div>
+          <div class="alert alert-error mt-12" *ngIf="errorMessage"><i class="fas fa-exclamation-circle"></i> {{ errorMessage }}</div>
+        </form>
       </div>
       <div class="glass-card">
         <h3 class="mb-16">Existing Reports</h3>

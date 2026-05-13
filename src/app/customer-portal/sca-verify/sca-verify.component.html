@@ -32,33 +32,44 @@
           (F12 → Console) to see it.
         </div>
 
-        <div class="form-group">
-          <label>Enter the {{ currentMethod.label }} code</label>
-          <input type="text"
-                 class="form-control otp-input"
-                 [(ngModel)]="enteredCode"
-                 [placeholder]="placeholder()"
-                 [maxlength]="currentMethod.length"
-                 autocomplete="off">
-        </div>
+        <form #scaForm="ngForm" (ngSubmit)="verify()" novalidate>
 
-        <button class="btn btn-light mb-12" (click)="regenerateCode()">
-          <i class="fas fa-redo"></i> Generate a new code
-        </button>
+          <div class="form-group">
+            <label>Enter the {{ currentMethod.label }} code <span class="required-asterisk">*</span></label>
+            <input type="text"
+                   name="enteredCode"
+                   class="form-control otp-input"
+                   [(ngModel)]="enteredCode"
+                   [placeholder]="placeholder()"
+                   [maxlength]="currentMethod.length"
+                   [minlength]="currentMethod.length"
+                   autocomplete="off"
+                   required
+                   #codeRef="ngModel">
+            <small class="field-error" *ngIf="codeRef.invalid && (codeRef.touched || scaForm.submitted)">
+              <i class="fas fa-exclamation-circle"></i>
+              <span *ngIf="codeRef.errors?.['required']">Verification code is required.</span>
+              <span *ngIf="codeRef.errors?.['minlength']">Code must be {{ currentMethod.length }} characters.</span>
+            </small>
+          </div>
 
-        <button class="btn btn-primary" style="width:100%"
-                (click)="verify()"
-                [disabled]="isVerifying || activated">
-          <span *ngIf="!isVerifying && !activated">
-            <i class="fas fa-check-circle"></i> Verify &amp; activate consent
-          </span>
-          <span *ngIf="isVerifying">
-            <i class="fas fa-spinner fa-spin"></i> Verifying...
-          </span>
-          <span *ngIf="activated">
-            <i class="fas fa-check-circle"></i> Activated
-          </span>
-        </button>
+          <button type="button" class="btn btn-light mb-12" (click)="regenerateCode()">
+            <i class="fas fa-redo"></i> Generate a new code
+          </button>
+
+          <button type="submit" class="btn btn-primary" style="width:100%"
+                  [disabled]="isVerifying || activated">
+            <span *ngIf="!isVerifying && !activated">
+              <i class="fas fa-check-circle"></i> Verify &amp; activate consent
+            </span>
+            <span *ngIf="isVerifying">
+              <i class="fas fa-spinner fa-spin"></i> Verifying...
+            </span>
+            <span *ngIf="activated">
+              <i class="fas fa-check-circle"></i> Activated
+            </span>
+          </button>
+        </form>
 
         <div class="alert alert-success mt-16" *ngIf="activated">
           <i class="fas fa-check-circle"></i>

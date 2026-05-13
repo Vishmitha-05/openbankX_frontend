@@ -34,17 +34,44 @@ export class RegisterComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (!this.name || !this.email || !this.password) {
-      this.errorMessage = 'Name, email, and password are required.';
+    if (!this.name || !this.email || !this.password || !this.phone) {
+      this.errorMessage = 'Name, email, phone and password are all required.';
+      return;
+    }
+
+    if (this.name.trim().length < 2) {
+      this.errorMessage = 'Name must be at least 2 characters.';
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(this.email)) {
+      this.errorMessage = 'Please enter a valid email address.';
+      return;
+    }
+
+    if (this.password.length < 8 || !/[A-Za-z]/.test(this.password) || !/\d/.test(this.password)) {
+      this.errorMessage = 'Password must be at least 8 characters and include both letters and numbers.';
+      return;
+    }
+
+    const phonePattern = /^\+?[0-9\-\s]{7,20}$/;
+    if (!phonePattern.test(this.phone)) {
+      this.errorMessage = 'Please enter a valid phone number.';
+      return;
+    }
+
+    if (!this.role) {
+      this.errorMessage = 'Please select a role.';
       return;
     }
 
     this.isSubmitting = true;
 
     this.authService.register({
-      name: this.name,
-      email: this.email,
-      phone: this.phone || '+91-0000000000',
+      name: this.name.trim(),
+      email: this.email.trim(),
+      phone: this.phone.trim(),
       password: this.password,
       role: this.role
     }).subscribe({

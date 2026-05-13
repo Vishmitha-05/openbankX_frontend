@@ -48,9 +48,38 @@ export class KeysUploadComponent implements OnInit {
 
   saveKeys(): void {
     if (this.isSaving) return;
+    this.errorMessage = '';
+
+    if (!this.jwkSet || !this.jwkSet.trim()) {
+      this.errorMessage = 'JWK Set is required.';
+      return;
+    }
+    try { JSON.parse(this.jwkSet); }
+    catch {
+      this.errorMessage = 'JWK Set must be valid JSON.';
+      return;
+    }
+    if (!this.redirectURIs || !this.redirectURIs.trim()) {
+      this.errorMessage = 'Redirect URIs are required.';
+      return;
+    }
+    try {
+      const parsed = JSON.parse(this.redirectURIs);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        this.errorMessage = 'Redirect URIs must be a non-empty JSON array.';
+        return;
+      }
+      if (!parsed.every((u: any) => typeof u === 'string' && /^https?:\/\//.test(u))) {
+        this.errorMessage = 'Every redirect URI must be a string starting with http:// or https://.';
+        return;
+      }
+    } catch {
+      this.errorMessage = 'Redirect URIs must be valid JSON.';
+      return;
+    }
+
     this.isSaving = true;
     this.saved = false;
-    this.errorMessage = '';
 
     this.tppService.updateApp(this.appId, {
       publicKeysJWKSet: this.jwkSet,

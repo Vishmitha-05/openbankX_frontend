@@ -14,31 +14,74 @@
       <i class="fas fa-check-circle"></i> {{ successMessage }}
     </div>
 
-    <div class="form-group">
-      <label>Legal Company Name</label>
-      <input type="text" class="form-control" placeholder="e.g. FinTech Solutions Ltd" [(ngModel)]="legalName">
-    </div>
+    <form #tppForm="ngForm" (ngSubmit)="register()" novalidate>
 
-    <div class="form-group">
-      <label>Registration Number</label>
-      <input type="text" class="form-control" placeholder="e.g. FCA-123456" [(ngModel)]="registrationNumber">
-    </div>
+      <div class="form-group">
+        <label>Legal Company Name <span class="required-asterisk">*</span></label>
+        <input type="text" class="form-control"
+               name="legalName"
+               placeholder="e.g. FinTech Solutions Ltd"
+               [(ngModel)]="legalName"
+               #legalRef="ngModel"
+               required
+               minlength="2"
+               maxlength="150">
+        <small class="field-error" *ngIf="legalRef.invalid && (legalRef.touched || tppForm.submitted)">
+          <i class="fas fa-exclamation-circle"></i>
+          <span *ngIf="legalRef.errors?.['required']">Legal company name is required.</span>
+          <span *ngIf="legalRef.errors?.['minlength']">Name must be at least 2 characters.</span>
+          <span *ngIf="legalRef.errors?.['maxlength']">Name must be 150 characters or less.</span>
+        </small>
+      </div>
 
-    <div class="form-group">
-      <label>Contact Email</label>
-      <input type="email" class="form-control"
-             [(ngModel)]="contactInfo"
-             placeholder="e.g. contact@your-tpp.com">
-    </div>
+      <div class="form-group">
+        <label>Registration Number <span class="required-asterisk">*</span></label>
+        <input type="text" class="form-control"
+               name="registrationNumber"
+               placeholder="e.g. FCA-123456"
+               [(ngModel)]="registrationNumber"
+               #regRef="ngModel"
+               required
+               minlength="3"
+               maxlength="50"
+               pattern="^[A-Za-z0-9\-]+$">
+        <small class="field-error" *ngIf="regRef.invalid && (regRef.touched || tppForm.submitted)">
+          <i class="fas fa-exclamation-circle"></i>
+          <span *ngIf="regRef.errors?.['required']">Registration number is required.</span>
+          <span *ngIf="regRef.errors?.['minlength']">Must be at least 3 characters.</span>
+          <span *ngIf="regRef.errors?.['pattern']">Only letters, digits and hyphens are allowed.</span>
+        </small>
+      </div>
 
-    <div class="form-group">
-      <label>Certification Reference (Optional)</label>
-      <input type="text" class="form-control" placeholder="eIDAS certificate ref" [(ngModel)]="certificationRef">
-    </div>
+      <div class="form-group">
+        <label>Contact Email <span class="required-asterisk">*</span></label>
+        <input type="email" class="form-control"
+               name="contactInfo"
+               [(ngModel)]="contactInfo"
+               placeholder="e.g. contact@your-tpp.com"
+               #emailRef="ngModel"
+               required
+               email>
+        <small class="field-error" *ngIf="emailRef.invalid && (emailRef.touched || tppForm.submitted)">
+          <i class="fas fa-exclamation-circle"></i>
+          <span *ngIf="emailRef.errors?.['required']">Contact email is required.</span>
+          <span *ngIf="emailRef.errors?.['email']">Please enter a valid email address.</span>
+        </small>
+      </div>
 
-    <button class="btn btn-primary btn-full" (click)="register()" [disabled]="isSubmitting">
-      <span *ngIf="!isSubmitting"><i class="fas fa-rocket"></i> Register TPP</span>
-      <span *ngIf="isSubmitting"><i class="fas fa-spinner fa-spin"></i> Registering...</span>
-    </button>
+      <div class="form-group">
+        <label>Certification Reference (Optional)</label>
+        <input type="text" class="form-control"
+               name="certificationRef"
+               placeholder="eIDAS certificate ref"
+               [(ngModel)]="certificationRef"
+               maxlength="100">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting"><i class="fas fa-rocket"></i> Register TPP</span>
+        <span *ngIf="isSubmitting"><i class="fas fa-spinner fa-spin"></i> Registering...</span>
+      </button>
+    </form>
   </div>
 </div>

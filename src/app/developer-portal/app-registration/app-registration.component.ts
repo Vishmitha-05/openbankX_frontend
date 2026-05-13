@@ -64,12 +64,45 @@ export class AppRegistrationComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (!this.appName) {
-      this.errorMessage = 'Application name is required.';
+    if (!this.appName || this.appName.trim().length < 3) {
+      this.errorMessage = 'Application name must be at least 3 characters.';
       return;
     }
     if (!this.tppId) {
       this.errorMessage = 'Please select a parent TPP company.';
+      return;
+    }
+    if (!this.redirectURIs || !this.redirectURIs.trim()) {
+      this.errorMessage = 'Redirect URIs are required.';
+      return;
+    }
+    try {
+      const parsed = JSON.parse(this.redirectURIs);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        this.errorMessage = 'Redirect URIs must be a non-empty JSON array, e.g. ["https://myapp.com/callback"].';
+        return;
+      }
+      const httpsOk = parsed.every((u: any) => typeof u === 'string' && /^https?:\/\//.test(u));
+      if (!httpsOk) {
+        this.errorMessage = 'Every redirect URI must be a string starting with http:// or https://.';
+        return;
+      }
+    } catch {
+      this.errorMessage = 'Redirect URIs must be valid JSON.';
+      return;
+    }
+    if (!this.publicKeys || !this.publicKeys.trim()) {
+      this.errorMessage = 'Public keys (JWK Set) are required.';
+      return;
+    }
+    try {
+      JSON.parse(this.publicKeys);
+    } catch {
+      this.errorMessage = 'Public keys must be valid JSON.';
+      return;
+    }
+    if (this.selectedScopes.length === 0) {
+      this.errorMessage = 'Select at least one requested scope.';
       return;
     }
 
@@ -78,9 +111,9 @@ export class AppRegistrationComponent implements OnInit {
 
     const appData = {
       tpp: { tppId: this.tppId },
-      appName: this.appName,
-      redirectURIs: this.redirectURIs || '[]',
-      publicKeysJWKSet: this.publicKeys || '{}',
+      appName: this.appName.trim(),
+      redirectURIs: this.redirectURIs,
+      publicKeysJWKSet: this.publicKeys,
       scopesRequested: JSON.stringify(this.selectedScopes),
       status: 'PENDING'
     };

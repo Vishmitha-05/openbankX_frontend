@@ -17,7 +17,7 @@ export class IncidentManagementComponent implements OnInit {
   showForm = false;
   errorMessage = '';
   categories = ['OUTAGE', 'LATENCY', 'SECURITY'];
-  newIncident = { category: 'LATENCY', description: '' };
+  newIncident = { category: '', description: '' };
 
   constructor(private monitoringService: MonitoringService) {}
 
@@ -29,8 +29,21 @@ export class IncidentManagementComponent implements OnInit {
   }
 
   createIncident(): void {
+    this.errorMessage = '';
+    if (!this.newIncident.category) {
+      this.errorMessage = 'Please choose a category.';
+      return;
+    }
+    if (!this.newIncident.description || this.newIncident.description.trim().length < 10) {
+      this.errorMessage = 'Description must be at least 10 characters.';
+      return;
+    }
     this.monitoringService.createIncident(this.newIncident as any).subscribe({
-      next: (d) => { this.incidents.unshift(d); this.showForm = false; this.newIncident.description = ''; },
+      next: (d) => {
+        this.incidents.unshift(d);
+        this.showForm = false;
+        this.newIncident = { category: '', description: '' };
+      },
       error: () => { this.errorMessage = 'Failed to create incident.'; }
     });
   }

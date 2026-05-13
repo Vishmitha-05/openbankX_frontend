@@ -24,62 +24,119 @@
         <i class="fas fa-check-circle"></i> {{ successMessage }}
       </div>
 
-      <!-- Name -->
-      <div class="form-group">
-        <label>Full Name</label>
-        <div class="input-icon">
-          <i class="fas fa-user"></i>
-          <input type="text" class="form-control with-icon" placeholder="Enter your full name" [(ngModel)]="name">
-        </div>
-      </div>
+      <form #registerForm="ngForm" (ngSubmit)="register()" novalidate>
 
-      <!-- Email -->
-      <div class="form-group">
-        <label>Email Address</label>
-        <div class="input-icon">
-          <i class="fas fa-envelope"></i>
-          <input type="email" class="form-control with-icon" placeholder="your@email.com" [(ngModel)]="email">
+        <!-- Name -->
+        <div class="form-group">
+          <label>Full Name <span class="required-asterisk">*</span></label>
+          <div class="input-icon">
+            <i class="fas fa-user"></i>
+            <input type="text"
+                   name="name"
+                   class="form-control with-icon"
+                   placeholder="Enter your full name"
+                   [(ngModel)]="name"
+                   #nameRef="ngModel"
+                   required
+                   minlength="2"
+                   maxlength="100"
+                   pattern="^[A-Za-z][A-Za-z\s\.\-']*$">
+          </div>
+          <small class="field-error" *ngIf="nameRef.invalid && (nameRef.touched || registerForm.submitted)">
+            <i class="fas fa-exclamation-circle"></i>
+            <span *ngIf="nameRef.errors?.['required']">Full name is required.</span>
+            <span *ngIf="nameRef.errors?.['minlength']">Name must be at least 2 characters.</span>
+            <span *ngIf="nameRef.errors?.['maxlength']">Name must be 100 characters or less.</span>
+            <span *ngIf="nameRef.errors?.['pattern']">Name can only contain letters, spaces, periods, hyphens and apostrophes.</span>
+          </small>
         </div>
-      </div>
 
-      <!-- Password -->
-      <div class="form-group">
-        <label>Password</label>
-        <div class="input-icon">
-          <i class="fas fa-lock"></i>
-          <input type="password" class="form-control with-icon" placeholder="Create a secure password" [(ngModel)]="password">
+        <!-- Email -->
+        <div class="form-group">
+          <label>Email Address <span class="required-asterisk">*</span></label>
+          <div class="input-icon">
+            <i class="fas fa-envelope"></i>
+            <input type="email"
+                   name="email"
+                   class="form-control with-icon"
+                   placeholder="your@email.com"
+                   [(ngModel)]="email"
+                   #emailRef="ngModel"
+                   required
+                   email>
+          </div>
+          <small class="field-error" *ngIf="emailRef.invalid && (emailRef.touched || registerForm.submitted)">
+            <i class="fas fa-exclamation-circle"></i>
+            <span *ngIf="emailRef.errors?.['required']">Email is required.</span>
+            <span *ngIf="emailRef.errors?.['email']">Please enter a valid email address.</span>
+          </small>
         </div>
-      </div>
 
-      <!-- Phone -->
-      <div class="form-group">
-        <label>Phone Number</label>
-        <div class="input-icon">
-          <i class="fas fa-phone"></i>
-          <input type="tel" class="form-control with-icon" placeholder="+91-9876543210" [(ngModel)]="phone">
+        <!-- Password -->
+        <div class="form-group">
+          <label>Password <span class="required-asterisk">*</span></label>
+          <div class="input-icon">
+            <i class="fas fa-lock"></i>
+            <input type="password"
+                   name="password"
+                   class="form-control with-icon"
+                   placeholder="Create a secure password (min 8 chars, letters + numbers)"
+                   [(ngModel)]="password"
+                   #passwordRef="ngModel"
+                   required
+                   minlength="8"
+                   pattern="^(?=.*[A-Za-z])(?=.*\d).+$">
+          </div>
+          <small class="field-error" *ngIf="passwordRef.invalid && (passwordRef.touched || registerForm.submitted)">
+            <i class="fas fa-exclamation-circle"></i>
+            <span *ngIf="passwordRef.errors?.['required']">Password is required.</span>
+            <span *ngIf="passwordRef.errors?.['minlength']">Password must be at least 8 characters.</span>
+            <span *ngIf="passwordRef.errors?.['pattern'] && !passwordRef.errors?.['minlength']">Password must contain at least one letter and one number.</span>
+          </small>
         </div>
-      </div>
 
-      <!-- Role Selection -->
-      <div class="form-group">
-        <label>Select Role</label>
-        <div class="role-select-grid">
-          <div *ngFor="let r of roles"
-               class="role-option"
-               [class.selected]="role === r.value"
-               (click)="role = r.value">
-            <i [class]="r.icon"></i>
-            <span class="role-option-label">{{ r.label }}</span>
-            <span class="role-option-desc">{{ r.desc }}</span>
+        <!-- Phone -->
+        <div class="form-group">
+          <label>Phone Number <span class="required-asterisk">*</span></label>
+          <div class="input-icon">
+            <i class="fas fa-phone"></i>
+            <input type="tel"
+                   name="phone"
+                   class="form-control with-icon"
+                   placeholder="+91-9876543210"
+                   [(ngModel)]="phone"
+                   #phoneRef="ngModel"
+                   required
+                   pattern="^\+?[0-9\-\s]{7,20}$">
+          </div>
+          <small class="field-error" *ngIf="phoneRef.invalid && (phoneRef.touched || registerForm.submitted)">
+            <i class="fas fa-exclamation-circle"></i>
+            <span *ngIf="phoneRef.errors?.['required']">Phone number is required.</span>
+            <span *ngIf="phoneRef.errors?.['pattern']">Enter a valid phone (digits, +, - and spaces only, 7-20 chars).</span>
+          </small>
+        </div>
+
+        <!-- Role Selection -->
+        <div class="form-group">
+          <label>Select Role <span class="required-asterisk">*</span></label>
+          <div class="role-select-grid">
+            <div *ngFor="let r of roles"
+                 class="role-option"
+                 [class.selected]="role === r.value"
+                 (click)="role = r.value">
+              <i [class]="r.icon"></i>
+              <span class="role-option-label">{{ r.label }}</span>
+              <span class="role-option-desc">{{ r.desc }}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Submit -->
-      <button class="btn btn-primary btn-full" (click)="register()" [disabled]="isSubmitting">
-        <span *ngIf="!isSubmitting"><i class="fas fa-rocket"></i> Create Account</span>
-        <span *ngIf="isSubmitting"><i class="fas fa-spinner fa-spin"></i> Creating...</span>
-      </button>
+        <!-- Submit -->
+        <button type="submit" class="btn btn-primary btn-full" [disabled]="isSubmitting">
+          <span *ngIf="!isSubmitting"><i class="fas fa-rocket"></i> Create Account</span>
+          <span *ngIf="isSubmitting"><i class="fas fa-spinner fa-spin"></i> Creating...</span>
+        </button>
+      </form>
 
       <!-- Login Link -->
       <div class="login-link">

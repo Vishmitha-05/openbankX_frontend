@@ -20,37 +20,67 @@
       <div class="glass-card mb-20" *ngIf="showForm" style="max-width:560px">
         <h3 class="mb-16">{{ editMode ? 'Edit API Product' : 'Create API Product' }}</h3>
 
-        <div class="form-group">
-          <label>Product Name</label>
-          <input type="text" class="form-control"
-                 [(ngModel)]="form.name"
-                 [readonly]="editMode"
-                 placeholder="e.g., Open Banking Core" />
-        </div>
+        <form #productForm="ngForm" (ngSubmit)="save()" novalidate>
 
-        <div class="form-group">
-          <label>Description</label>
-          <textarea class="form-control"
-                    [(ngModel)]="form.description"
-                    rows="2"
-                    placeholder="Describe what this product offers"></textarea>
-        </div>
+          <div class="form-group">
+            <label>Product Name <span class="required-asterisk">*</span></label>
+            <input type="text" class="form-control"
+                   name="name"
+                   [(ngModel)]="form.name"
+                   [readonly]="editMode"
+                   placeholder="e.g., Open Banking Core"
+                   #nameRef="ngModel"
+                   required
+                   minlength="3"
+                   maxlength="80" />
+            <small class="field-error" *ngIf="nameRef.invalid && (nameRef.touched || productForm.submitted)">
+              <i class="fas fa-exclamation-circle"></i>
+              <span *ngIf="nameRef.errors?.['required']">Product name is required.</span>
+              <span *ngIf="nameRef.errors?.['minlength']">Name must be at least 3 characters.</span>
+              <span *ngIf="nameRef.errors?.['maxlength']">Name must be 80 characters or less.</span>
+            </small>
+          </div>
 
-        <div class="form-group">
-          <label>Endpoints (JSON array)</label>
-          <textarea class="form-control font-mono"
-                    [(ngModel)]="form.endpointsJSON"
-                    rows="2"
-                    placeholder='["/accounts","/payments"]'></textarea>
-        </div>
+          <div class="form-group">
+            <label>Description <span class="required-asterisk">*</span></label>
+            <textarea class="form-control"
+                      name="description"
+                      [(ngModel)]="form.description"
+                      rows="2"
+                      placeholder="Describe what this product offers"
+                      #descRef="ngModel"
+                      required
+                      minlength="10"
+                      maxlength="500"></textarea>
+            <small class="field-error" *ngIf="descRef.invalid && (descRef.touched || productForm.submitted)">
+              <i class="fas fa-exclamation-circle"></i>
+              <span *ngIf="descRef.errors?.['required']">Description is required.</span>
+              <span *ngIf="descRef.errors?.['minlength']">Description must be at least 10 characters.</span>
+            </small>
+          </div>
 
-        <div class="flex gap-8">
-          <button class="btn btn-success" (click)="save()" [disabled]="isSaving">
-            <span *ngIf="!isSaving"><i class="fas fa-check"></i> {{ editMode ? 'Update' : 'Create' }}</span>
-            <span *ngIf="isSaving"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
-          </button>
-          <button class="btn btn-light" (click)="cancel()" [disabled]="isSaving">Cancel</button>
-        </div>
+          <div class="form-group">
+            <label>Endpoints (JSON array) <span class="required-asterisk">*</span></label>
+            <textarea class="form-control font-mono"
+                      name="endpointsJSON"
+                      [(ngModel)]="form.endpointsJSON"
+                      rows="2"
+                      placeholder='["/accounts","/payments"]'
+                      #epRef="ngModel"
+                      required></textarea>
+            <small class="field-error" *ngIf="epRef.invalid && (epRef.touched || productForm.submitted)">
+              <i class="fas fa-exclamation-circle"></i> Endpoints are required.
+            </small>
+          </div>
+
+          <div class="flex gap-8">
+            <button type="submit" class="btn btn-success" [disabled]="isSaving">
+              <span *ngIf="!isSaving"><i class="fas fa-check"></i> {{ editMode ? 'Update' : 'Create' }}</span>
+              <span *ngIf="isSaving"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+            </button>
+            <button type="button" class="btn btn-light" (click)="cancel()" [disabled]="isSaving">Cancel</button>
+          </div>
+        </form>
       </div>
 
       <!-- LOADING -->

@@ -31,7 +31,6 @@ export class SidebarComponent {
     { label: 'My Apps',        route: '/developer/apps',          icon: 'fas fa-cube' },
     { label: 'Register App',   route: '/developer/apps/new',      icon: 'fas fa-plus-circle' },
     { label: 'Subscribe Plan', route: '/developer/subscribe',     icon: 'fas fa-plug' },
-    { label: 'Sandbox',        route: '/developer/sandbox',       icon: 'fas fa-flask' },
     { label: 'Analytics',      route: '/developer/analytics',     icon: 'fas fa-chart-bar' }
   ];
 
@@ -59,8 +58,7 @@ export class SidebarComponent {
     { label: 'API Products',   route: '/admin/products',    icon: 'fas fa-boxes' },
     { label: 'Plan Config',    route: '/admin/plans',       icon: 'fas fa-sliders-h' },
     { label: 'User Mgmt',      route: '/admin/users',       icon: 'fas fa-users' },
-    { label: 'TPP Mgmt',       route: '/admin/tpp',         icon: 'fas fa-building' },
-    { label: 'SCA Policy',     route: '/admin/sca-policy',  icon: 'fas fa-lock' }
+    { label: 'TPP Mgmt',       route: '/admin/tpp',         icon: 'fas fa-building' }
   ];
 
   constructor(private authService: AuthService) {

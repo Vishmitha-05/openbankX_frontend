@@ -95,49 +95,83 @@
 
     <ng-container *ngIf="accounts.length > 0">
 
-      <div class="form-group">
-        <label>From account</label>
-        <select class="form-control" [(ngModel)]="selectedAccountId">
-          <option [ngValue]="null" disabled>Select one of your accounts…</option>
-          <option *ngFor="let acc of accounts" [ngValue]="acc.accountId">
-            {{ acc.accountNumberMasked }} · {{ acc.type }} · {{ acc.currency }}
-          </option>
-        </select>
-      </div>
+      <form #payForm="ngForm" (ngSubmit)="submitPayment()" novalidate>
 
-      <div class="form-group">
-        <label>To account</label>
-        <input type="text" class="form-control"
-               [(ngModel)]="payeeAccount"
-               placeholder="Recipient account number or IBAN (e.g. ****-5678)">
-      </div>
-
-      <div class="form-group">
-        <label>Amount</label>
-        <div class="amount-input-wrap">
-          <span class="amount-currency">{{ currency }}</span>
-          <input type="number" class="form-control"
-                 min="0" step="0.01"
-                 placeholder="0.00"
-                 [(ngModel)]="amount">
+        <div class="form-group">
+          <label>From account <span class="required-asterisk">*</span></label>
+          <select class="form-control"
+                  name="fromAccount"
+                  [(ngModel)]="selectedAccountId"
+                  #fromRef="ngModel"
+                  required>
+            <option [ngValue]="null" disabled>Select one of your accounts…</option>
+            <option *ngFor="let acc of accounts" [ngValue]="acc.accountId">
+              {{ acc.accountNumberMasked }} · {{ acc.type }} · {{ acc.currency }}
+            </option>
+          </select>
+          <small class="field-error" *ngIf="fromRef.invalid && (fromRef.touched || payForm.submitted)">
+            <i class="fas fa-exclamation-circle"></i> Please choose the source account.
+          </small>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label>Reference (optional)</label>
-        <input type="text" class="form-control"
-               [(ngModel)]="narrative"
-               placeholder="e.g. May rent, dinner, etc.">
-      </div>
+        <div class="form-group">
+          <label>To account <span class="required-asterisk">*</span></label>
+          <input type="text" class="form-control"
+                 name="payeeAccount"
+                 [(ngModel)]="payeeAccount"
+                 placeholder="Recipient account number or IBAN (e.g. ****-5678)"
+                 #payeeRef="ngModel"
+                 required
+                 minlength="4"
+                 maxlength="34"
+                 pattern="^[A-Za-z0-9\-\* ]+$">
+          <small class="field-error" *ngIf="payeeRef.invalid && (payeeRef.touched || payForm.submitted)">
+            <i class="fas fa-exclamation-circle"></i>
+            <span *ngIf="payeeRef.errors?.['required']">Recipient account is required.</span>
+            <span *ngIf="payeeRef.errors?.['minlength']">Recipient account must be at least 4 characters.</span>
+            <span *ngIf="payeeRef.errors?.['maxlength']">Recipient account is too long.</span>
+            <span *ngIf="payeeRef.errors?.['pattern']">Only letters, digits, hyphens, asterisks and spaces are allowed.</span>
+          </small>
+        </div>
 
-      <div class="flex gap-16 mt-20">
-        <button class="btn btn-primary flex-1"
-                (click)="submitPayment()"
-                [disabled]="!selectedAccountId || !payeeAccount || !amount || amount <= 0">
-          <i class="fas fa-paper-plane"></i> Pay {{ amount ? (currency + ' ' + (amount | number:'1.2-2')) : '' }}
-        </button>
-        <button class="btn btn-secondary flex-1" (click)="cancel()">Cancel</button>
-      </div>
+        <div class="form-group">
+          <label>Amount <span class="required-asterisk">*</span></label>
+          <div class="amount-input-wrap">
+            <span class="amount-currency">{{ currency }}</span>
+            <input type="number" class="form-control"
+                   name="amount"
+                   min="0.01"
+                   max="100000000"
+                   step="0.01"
+                   placeholder="0.00"
+                   [(ngModel)]="amount"
+                   #amountRef="ngModel"
+                   required>
+          </div>
+          <small class="field-error" *ngIf="amountRef.invalid && (amountRef.touched || payForm.submitted)">
+            <i class="fas fa-exclamation-circle"></i>
+            <span *ngIf="amountRef.errors?.['required']">Amount is required.</span>
+            <span *ngIf="amountRef.errors?.['min']">Amount must be greater than 0.</span>
+            <span *ngIf="amountRef.errors?.['max']">Amount is too large.</span>
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Reference (optional)</label>
+          <input type="text" class="form-control"
+                 name="narrative"
+                 [(ngModel)]="narrative"
+                 maxlength="140"
+                 placeholder="e.g. May rent, dinner, etc.">
+        </div>
+
+        <div class="flex gap-16 mt-20">
+          <button type="submit" class="btn btn-primary flex-1">
+            <i class="fas fa-paper-plane"></i> Pay {{ amount ? (currency + ' ' + (amount | number:'1.2-2')) : '' }}
+          </button>
+          <button type="button" class="btn btn-secondary flex-1" (click)="cancel()">Cancel</button>
+        </div>
+      </form>
 
     </ng-container>
   </div>

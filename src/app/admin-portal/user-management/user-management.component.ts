@@ -38,7 +38,7 @@ export class UserManagementComponent implements OnInit {
       email: '',
       phone: '',
       password: '',
-      role: 'CUSTOMER',
+      role: '',
       status: 'ACTIVE'
     };
   }
@@ -91,12 +91,27 @@ export class UserManagementComponent implements OnInit {
   }
 
   save(): void {
-    if (!this.form.name || !this.form.email) {
-      this.errorMessage = 'Name and email are required.';
+    if (!this.form.name || this.form.name.trim().length < 2) {
+      this.errorMessage = 'Name is required (min 2 characters).';
       return;
     }
-    if (!this.editMode && !this.form.password) {
-      this.errorMessage = 'Password is required for new users.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email || '')) {
+      this.errorMessage = 'Please enter a valid email.';
+      return;
+    }
+    if (!/^\+?[0-9\-\s]{7,20}$/.test(this.form.phone || '')) {
+      this.errorMessage = 'Please enter a valid phone number.';
+      return;
+    }
+    if (!this.editMode) {
+      const p = this.form.password || '';
+      if (p.length < 8 || !/[A-Za-z]/.test(p) || !/\d/.test(p)) {
+        this.errorMessage = 'Password must be at least 8 characters and include letters and numbers.';
+        return;
+      }
+    }
+    if (!this.form.role) {
+      this.errorMessage = 'Role is required.';
       return;
     }
 

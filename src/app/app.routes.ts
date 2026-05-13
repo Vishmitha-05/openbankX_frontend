@@ -27,7 +27,6 @@ export const routes: Routes = [
       { path: 'apps/:id/keys', loadComponent: () => import('./developer-portal/keys-upload/keys-upload.component').then(m => m.KeysUploadComponent) },
       { path: 'tpp-register', loadComponent: () => import('./developer-portal/tpp-registration/tpp-registration.component').then(m => m.TppRegistrationComponent) },
       { path: 'subscribe', loadComponent: () => import('./developer-portal/subscribe-plan/subscribe-plan.component').then(m => m.SubscriptionPlanComponent) },
-      { path: 'sandbox', loadComponent: () => import('./developer-portal/sandbox-explorer/sandbox-explorer.component').then(m => m.SandboxExplorerComponent) },
       { path: 'analytics', loadComponent: () => import('./developer-portal/usage-analytics/usage-analytics.component').then(m => m.UsageAnalyticsComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
@@ -95,7 +94,6 @@ export const routes: Routes = [
       { path: 'plans', loadComponent: () => import('./admin-portal/plan-configuration/plan-configuration.component').then(m => m.PlanConfigurationComponent) },
       { path: 'users', loadComponent: () => import('./admin-portal/user-management/user-management.component').then(m => m.UserManagementComponent) },
       { path: 'tpp', loadComponent: () => import('./admin-portal/tpp-management/tpp-management.component').then(m => m.TppManagementComponent) },
-      { path: 'sca-policy', loadComponent: () => import('./admin-portal/sca-policy/sca-policy.component').then(m => m.ScaPolicyComponent) },
       { path: '', redirectTo: 'products', pathMatch: 'full' }
     ]
   },

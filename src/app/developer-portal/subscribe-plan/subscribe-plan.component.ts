@@ -25,6 +25,7 @@ export class SubscriptionPlanComponent implements OnInit {
 
   isLoading = true;
   isSubscribing = false;
+  submitAttempted = false;
   errorMessage = '';
   successMessage = '';
 
@@ -117,6 +118,7 @@ export class SubscriptionPlanComponent implements OnInit {
   /* ---------------- Subscribe ---------------- */
 
   subscribe(): void {
+    this.submitAttempted = true;
     if (this.selectedPlanId == null || this.selectedAppId == null) {
       this.errorMessage = 'Please select both an app and a plan.';
       return;

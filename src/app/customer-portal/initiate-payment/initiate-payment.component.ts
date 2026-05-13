@@ -132,6 +132,15 @@ export class InitiatePaymentComponent implements OnInit {
       this.errorMessage = 'Please fill all required fields correctly.';
       return;
     }
+    const trimmedPayee = this.payeeAccount.trim();
+    if (trimmedPayee.length < 4 || !/^[A-Za-z0-9\-\* ]+$/.test(trimmedPayee)) {
+      this.errorMessage = 'Recipient account is not in a valid format.';
+      return;
+    }
+    if (this.selectedAccount && trimmedPayee === this.selectedAccount.accountNumberMasked) {
+      this.errorMessage = 'Source and recipient accounts cannot be the same.';
+      return;
+    }
     if (!this.tppAppId) {
       this.errorMessage = 'Open this page through an app to initiate a payment.';
       return;

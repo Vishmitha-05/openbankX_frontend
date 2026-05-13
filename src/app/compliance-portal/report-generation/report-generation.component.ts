@@ -30,7 +30,12 @@ export class ReportGenerationComponent implements OnInit {
   generate(): void {
     this.generated = false;
     this.errorMessage = '';
-    this.auditService.generateReport(this.scope).subscribe({
+    const trimmed = (this.scope || '').trim();
+    if (trimmed.length < 3) {
+      this.errorMessage = 'Report scope must be at least 3 characters.';
+      return;
+    }
+    this.auditService.generateReport(trimmed).subscribe({
       next: (d) => { this.reports.unshift(d); this.generated = true; this.scope = ''; },
       error: () => { this.errorMessage = 'Failed to generate report.'; }
     });

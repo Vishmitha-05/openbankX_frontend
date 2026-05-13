@@ -272,6 +272,35 @@ textarea.form-control {
   resize: vertical;
 }
 
+/* ---------- Form Validation ---------- */
+.form-control.ng-invalid.ng-touched,
+.form-control.is-invalid {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.form-control.ng-invalid.ng-touched:focus,
+.form-control.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10);
+}
+
+.field-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: #b91c1c;
+  font-weight: 500;
+}
+
+.field-error i {
+  margin-right: 4px;
+}
+
+.required-asterisk {
+  color: #dc2626;
+  margin-left: 2px;
+}
+
 /* ---------- Status Badges ---------- */
 .badge {
   display: inline-flex;

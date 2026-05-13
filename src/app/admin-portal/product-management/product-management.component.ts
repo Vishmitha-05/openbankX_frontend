@@ -109,8 +109,30 @@ export class ProductManagementComponent implements OnInit, OnDestroy {
   }
 
   save(): void {
-    if (!this.form.name) {
-      this.errorMessage = 'Product name is required.';
+    if (!this.form.name || this.form.name.trim().length < 3) {
+      this.errorMessage = 'Product name is required (min 3 characters).';
+      return;
+    }
+    if (!this.form.description || this.form.description.trim().length < 10) {
+      this.errorMessage = 'Description is required (min 10 characters).';
+      return;
+    }
+    if (!this.form.endpointsJSON || !this.form.endpointsJSON.trim()) {
+      this.errorMessage = 'Endpoints are required.';
+      return;
+    }
+    try {
+      const parsed = JSON.parse(this.form.endpointsJSON);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        this.errorMessage = 'Endpoints must be a non-empty JSON array (e.g. ["/accounts","/payments"]).';
+        return;
+      }
+      if (!parsed.every((e: any) => typeof e === 'string' && e.startsWith('/'))) {
+        this.errorMessage = 'Every endpoint must be a string starting with "/".';
+        return;
+      }
+    } catch {
+      this.errorMessage = 'Endpoints must be valid JSON.';
       return;
     }
 

@@ -14,13 +14,21 @@
 
     <!-- Step 1: pick your app -->
     <div class="glass-card mb-20" style="max-width:560px">
-      <h3 class="mb-12">1. Select your app</h3>
-      <select class="form-control" [(ngModel)]="selectedAppId" (ngModelChange)="onAppChange()">
+      <h3 class="mb-12">1. Select your app <span class="required-asterisk">*</span></h3>
+      <select class="form-control"
+              name="selectedApp"
+              [(ngModel)]="selectedAppId"
+              (ngModelChange)="onAppChange()"
+              #appSelectRef="ngModel"
+              required>
         <option [ngValue]="null" disabled>Choose an approved app</option>
         <option *ngFor="let app of getApprovedApps()" [ngValue]="app.tppAppId">
           {{ app.appName }}
         </option>
       </select>
+      <small class="field-error" *ngIf="submitAttempted && appSelectRef.invalid">
+        <i class="fas fa-exclamation-circle"></i> You must select an app before subscribing.
+      </small>
       <small class="text-muted" *ngIf="getApprovedApps().length === 0">
         You don't have any approved apps yet. Wait for an admin to approve one.
       </small>
@@ -78,9 +86,13 @@
           <div class="text-muted">Click a plan card above to pick one.</div>
         </ng-template>
 
+        <small class="field-error" *ngIf="submitAttempted && selectedPlanId == null">
+          <i class="fas fa-exclamation-circle"></i> Choose a plan card above to continue.
+        </small>
+
         <button class="btn btn-primary btn-full mt-16"
                 (click)="subscribe()"
-                [disabled]="isSubscribing || selectedPlanId == null || selectedAppId == null">
+                [disabled]="isSubscribing">
           <span *ngIf="!isSubscribing"><i class="fas fa-link"></i> Subscribe this app to the plan</span>
           <span *ngIf="isSubscribing"><i class="fas fa-spinner fa-spin"></i> Subscribing...</span>
         </button>

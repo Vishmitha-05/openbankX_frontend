@@ -98,6 +98,30 @@ export class PlanConfigurationComponent implements OnInit {
       this.errorMessage = 'Please choose an API product.';
       return;
     }
+    if (!['SANDBOX', 'PRODUCTION'].includes(this.form.environment)) {
+      this.errorMessage = 'Please choose a valid environment.';
+      return;
+    }
+    if (!Number.isFinite(this.form.rateLimitPerMin) || this.form.rateLimitPerMin < 1) {
+      this.errorMessage = 'Rate limit must be at least 1.';
+      return;
+    }
+    if (!Number.isFinite(this.form.dailyQuota) || this.form.dailyQuota < 1) {
+      this.errorMessage = 'Daily quota must be at least 1.';
+      return;
+    }
+    if (!Number.isFinite(this.form.sla) || this.form.sla < 0 || this.form.sla > 100) {
+      this.errorMessage = 'SLA must be between 0 and 100.';
+      return;
+    }
+    if (!Number.isFinite(this.form.durationValue) || this.form.durationValue < 1) {
+      this.errorMessage = 'Duration value must be at least 1.';
+      return;
+    }
+    if (!['DAYS', 'MONTHS', 'YEARS'].includes(this.form.durationUnit)) {
+      this.errorMessage = 'Please choose a valid duration unit.';
+      return;
+    }
 
     this.isSaving = true;
     const payload = {
