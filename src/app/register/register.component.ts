@@ -55,9 +55,9 @@ export class RegisterComponent {
       return;
     }
 
-    const phonePattern = /^\+?[0-9\-\s]{7,20}$/;
+    const phonePattern = /^[6-9][0-9]{9}$/;
     if (!phonePattern.test(this.phone)) {
-      this.errorMessage = 'Please enter a valid phone number.';
+      this.errorMessage = 'Phone must be exactly 10 digits and start with 6, 7, 8 or 9.';
       return;
     }
 
@@ -75,12 +75,20 @@ export class RegisterComponent {
       password: this.password,
       role: this.role
     }).subscribe({
-      next: () => {
-        this.successMessage = `Account created successfully! Redirecting to login...`;
+      next: (response: any) => {
+        this.authService.saveSession(
+          response.userId,
+          response.name,
+          response.email,
+          response.role,
+          response.accessToken
+        );
+        this.successMessage = `Welcome, ${response.name}! Redirecting...`;
+        const target = this.routeForRole(response.role);
         setTimeout(() => {
           this.isSubmitting = false;
-          this.router.navigate(['/login']);
-        }, 1500);
+          this.router.navigate([target]);
+        }, 800);
       },
       error: (err: any) => {
         this.isSubmitting = false;
@@ -93,5 +101,15 @@ export class RegisterComponent {
         }
       }
     });
+  }
+
+  private routeForRole(role: string): string {
+    switch (role) {
+      case 'TPP':        return '/developer/dashboard';
+      case 'CUSTOMER':   return '/customer/consents';
+      case 'OPERATIONS': return '/operations/health';
+      case 'ADMIN':      return '/admin/products';
+      default:           return '/login';
+    }
   }
 }

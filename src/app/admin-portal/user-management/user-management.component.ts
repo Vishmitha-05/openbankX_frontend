@@ -99,8 +99,8 @@ export class UserManagementComponent implements OnInit {
       this.errorMessage = 'Please enter a valid email.';
       return;
     }
-    if (!/^\+?[0-9\-\s]{7,20}$/.test(this.form.phone || '')) {
-      this.errorMessage = 'Please enter a valid phone number.';
+    if (!/^[6-9][0-9]{9}$/.test(this.form.phone || '')) {
+      this.errorMessage = 'Phone must be exactly 10 digits and start with 6, 7, 8 or 9.';
       return;
     }
     if (!this.editMode) {

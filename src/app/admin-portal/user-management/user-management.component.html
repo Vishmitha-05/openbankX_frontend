@@ -62,14 +62,17 @@
             <label>Phone <span class="required-asterisk">*</span></label>
             <input class="form-control"
                    name="phone"
+                   placeholder="9876543210"
+                   maxlength="10"
+                   inputmode="numeric"
                    [(ngModel)]="form.phone"
                    #phoneRef="ngModel"
                    required
-                   pattern="^\+?[0-9\-\s]{7,20}$">
+                   pattern="^[6-9][0-9]{9}$">
             <small class="field-error" *ngIf="phoneRef.invalid && (phoneRef.touched || userForm.submitted)">
               <i class="fas fa-exclamation-circle"></i>
               <span *ngIf="phoneRef.errors?.['required']">Phone is required.</span>
-              <span *ngIf="phoneRef.errors?.['pattern']">Enter a valid phone (digits, +, - and spaces, 7-20 chars).</span>
+              <span *ngIf="phoneRef.errors?.['pattern']">Enter a valid 10-digit mobile number starting with 6, 7, 8 or 9.</span>
             </small>
           </div>
 

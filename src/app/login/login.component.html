@@ -53,12 +53,12 @@
                    [(ngModel)]="password"
                    #passwordRef="ngModel"
                    required
-                   minlength="6">
+                   minlength="8">
           </div>
           <small class="field-error" *ngIf="passwordRef.invalid && (passwordRef.touched || loginForm.submitted)">
             <i class="fas fa-exclamation-circle"></i>
             <span *ngIf="passwordRef.errors?.['required']">Password is required.</span>
-            <span *ngIf="passwordRef.errors?.['minlength']">Password must be at least 6 characters.</span>
+            <span *ngIf="passwordRef.errors?.['minlength']">Password must be at least 8 characters.</span>
           </small>
         </div>
 

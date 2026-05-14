@@ -278,12 +278,3 @@ export interface Notification {
   createdDate: string;
 }
 
-// ========== Login / Session ==========
-
-export interface LoginSession {
-  userId: number;
-  name: string;
-  email: string;
-  role: 'CUSTOMER' | 'TPP' | 'OPERATIONS' | 'ADMIN';
-  token: string;
-}

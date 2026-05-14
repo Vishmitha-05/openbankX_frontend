@@ -93,19 +93,6 @@ export class AuthService {
     localStorage.removeItem('obx_session');
   }
 
-  /**
-   * Refresh the stored token with a fresh one from the backend.
-   * Called by the auth interceptor when X-Auth-Token is received in a response.
-   * This keeps the session token fresh after every API operation.
-   */
-  refreshToken(newToken: string): void {
-    const session = this.getSession();
-    if (session) {
-      session.token = newToken;
-      localStorage.setItem('obx_session', JSON.stringify(session));
-    }
-  }
-
   // ---------- SCA ----------
 
   /** Verify SCA (OTP) via POST /api/v1/sca/otp */

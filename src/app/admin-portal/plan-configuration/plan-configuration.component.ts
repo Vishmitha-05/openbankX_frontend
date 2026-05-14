@@ -47,7 +47,7 @@ export class PlanConfigurationComponent implements OnInit {
   loadProducts(): void {
     this.productService.getProducts().subscribe({
       next: d => this.products = d || [],
-      error: () => {} // table-level error already covers it
+      error: () => { this.errorMessage = 'Unable to load API products.'; }
     });
   }
 

@@ -62,7 +62,7 @@ export class FundsCheckComponent implements OnInit {
             this.appName = consent.tppApp.appName;
             this.hasFundsAccess = this.hasScope(consent, 'funds-confirmations');
             if (this.hasFundsAccess) {
-              this.accountService.getAccounts(userId).subscribe({
+              this.accountService.getAccounts(userId, this.tppAppId).subscribe({
                 next: accs => { this.accounts = accs || []; this.isCheckingPermission = false; },
                 error: () => {
                   this.errorMessage = 'Unable to load accounts for funds check.';

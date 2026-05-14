@@ -61,14 +61,14 @@ export class ProductManagementComponent implements OnInit, OnDestroy {
   loadPlans(): void {
     this.productService.getPlans().subscribe({
       next: (d) => this.plans = d || [],
-      error: () => {}
+      error: () => { this.errorMessage = 'Unable to load plans.'; }
     });
   }
 
   loadSubscriptions(): void {
     this.productService.getSubscriptions().subscribe({
       next: (d) => this.subscriptions = d || [],
-      error: () => {}
+      error: () => { this.errorMessage = 'Unable to load subscriptions.'; }
     });
   }
 

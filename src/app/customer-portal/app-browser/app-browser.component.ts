@@ -74,6 +74,9 @@ export class AppBrowserComponent implements OnInit {
         consents
           .filter(c => c.status === 'ACTIVE' && c.tppApp?.tppAppId)
           .forEach(c => this.consentsByApp.set(c.tppApp.tppAppId, c));
+      },
+      error: () => {
+        this.errorMessage = 'Unable to load your existing consents. Already-granted apps may show as ungranted.';
       }
     });
   }

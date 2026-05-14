@@ -103,16 +103,18 @@
             <input type="tel"
                    name="phone"
                    class="form-control with-icon"
-                   placeholder="+91-9876543210"
+                   placeholder="9876543210"
+                   maxlength="10"
+                   inputmode="numeric"
                    [(ngModel)]="phone"
                    #phoneRef="ngModel"
                    required
-                   pattern="^\+?[0-9\-\s]{7,20}$">
+                   pattern="^[6-9][0-9]{9}$">
           </div>
           <small class="field-error" *ngIf="phoneRef.invalid && (phoneRef.touched || registerForm.submitted)">
             <i class="fas fa-exclamation-circle"></i>
             <span *ngIf="phoneRef.errors?.['required']">Phone number is required.</span>
-            <span *ngIf="phoneRef.errors?.['pattern']">Enter a valid phone (digits, +, - and spaces only, 7-20 chars).</span>
+            <span *ngIf="phoneRef.errors?.['pattern']">Enter a valid 10-digit mobile number starting with 6, 7, 8 or 9.</span>
           </small>
         </div>
 

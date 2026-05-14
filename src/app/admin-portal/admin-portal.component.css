@@ -4,7 +4,7 @@
 }
 .portal-main {
   flex: 1;
-  margin-left: 240px;
+  margin-left: var(--sidebar-width);
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -14,10 +14,4 @@
   flex: 1;
   overflow-y: auto;
   background-color: var(--bg-primary);
-}
-
-@media (max-width: 992px) {
-  .portal-main {
-    margin-left: 72px;
-  }
 }

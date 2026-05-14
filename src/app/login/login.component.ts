@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -11,7 +11,7 @@ import { AuthService } from '../core/services/auth.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
 
   email: string = '';
   password: string = '';
@@ -20,6 +20,15 @@ export class LoginComponent {
   successMessage: string = '';
 
   constructor(private authService: AuthService, private router: Router) {}
+
+  ngOnInit(): void {
+    // Already signed in (session in localStorage) → skip the login form and
+    // go straight to the role's portal. This is what makes refresh / opening
+    // the app at "/" not look like a forced logout.
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate([this.routeForRole(this.authService.getRole())]);
+    }
+  }
 
   login(): void {
     this.errorMessage = '';
@@ -36,8 +45,8 @@ export class LoginComponent {
       return;
     }
 
-    if (this.password.length < 6) {
-      this.errorMessage = 'Password must be at least 6 characters.';
+    if (this.password.length < 8) {
+      this.errorMessage = 'Password must be at least 8 characters.';
       return;
     }
 

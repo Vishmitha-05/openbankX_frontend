@@ -52,10 +52,10 @@ export class TppRegistrationComponent {
 
     this.isSubmitting = true;
     this.tppService.registerTpp({
-      legalName: this.legalName,
-      registrationNumber: this.registrationNumber,
+      legalName: this.legalName.trim(),
+      registrationNumber: this.registrationNumber.trim(),
       contactInfo: contact,
-      certificationRef: this.certificationRef || 'CERT-' + Date.now(),
+      certificationRef: (this.certificationRef || '').trim(),
       status: 'SANDBOX'
     }).subscribe({
       next: () => {

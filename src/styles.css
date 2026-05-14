@@ -42,6 +42,7 @@
   --shadow-colorful: 0 4px 16px rgba(10, 37, 64, 0.10);
 
   --sidebar-width: 240px;
+  --sidebar-width-collapsed: 72px;
   --navbar-height: 64px;
   --radius: 10px;
   --radius-sm: 8px;
@@ -75,6 +76,16 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Sidebar drives this CSS variable so every .portal-main margin tracks it. */
+body.sidebar-collapsed {
+  --sidebar-width: var(--sidebar-width-collapsed);
+}
+@media (max-width: 992px) {
+  body {
+    --sidebar-width: var(--sidebar-width-collapsed);
+  }
 }
 
 a {

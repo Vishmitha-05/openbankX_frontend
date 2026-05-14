@@ -57,7 +57,9 @@ export class DashboardComponent implements OnInit {
               this.stats[2].value = statsData.errorRate;
               this.stats[3].value = statsData.avgLatencyMs + 'ms';
             },
-            error: () => { /* stats remain at 0 */ }
+            error: () => {
+              this.errorMessage = 'Unable to load API usage statistics for your first app.';
+            }
           });
 
           for (const app of this.apps) {

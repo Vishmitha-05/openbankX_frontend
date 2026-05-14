@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -6,11 +6,11 @@ import { AuthService } from '../../core/services/auth.service';
 /**
  * SidebarComponent — The main navigation sidebar.
  *
- * DIRECTIVES USED:
- *   *ngSwitch  → Show different menu items based on user role
- *   *ngFor     → Loop through menu items
- *   [ngClass]  → Highlight active menu item
- *   *ngIf      → Show/hide sidebar sections
+ * The sidebar uses the global `--sidebar-width` CSS variable for its width.
+ * When the user toggles collapse (or the window is narrower than 992px),
+ * we add `sidebar-collapsed` to <body>; CSS rules in styles.css flip the
+ * variable to `--sidebar-width-collapsed`, and every `.portal-main` in the
+ * app re-aligns its left margin because they all read the same variable.
  */
 @Component({
   selector: 'app-sidebar',
@@ -19,12 +19,13 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css'
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit, OnDestroy {
 
   session: any = null;
   isCollapsed = false;
 
-  // Menu items for each role — rendered with *ngFor
+  private readonly COLLAPSE_BREAKPOINT = 992;
+
   tppMenu = [
     { label: 'Dashboard',      route: '/developer/dashboard',     icon: 'fas fa-tachometer-alt' },
     { label: 'Register TPP',   route: '/developer/tpp-register',  icon: 'fas fa-building' },
@@ -65,8 +66,38 @@ export class SidebarComponent {
     this.session = this.authService.getSession();
   }
 
+  ngOnInit(): void {
+    this.applyResponsiveCollapse(window.innerWidth);
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('sidebar-collapsed');
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: UIEvent): void {
+    const w = (event.target as Window).innerWidth;
+    this.applyResponsiveCollapse(w);
+  }
+
+  /**
+   * Below the breakpoint we force-collapse the sidebar so the page never
+   * has a 240px wall taking half the screen on a small window. Above it we
+   * respect whatever the user last clicked.
+   */
+  private applyResponsiveCollapse(viewportWidth: number): void {
+    if (viewportWidth < this.COLLAPSE_BREAKPOINT) {
+      this.setCollapsed(true);
+    }
+  }
+
   toggleCollapse(): void {
-    this.isCollapsed = !this.isCollapsed;
+    this.setCollapsed(!this.isCollapsed);
+  }
+
+  private setCollapsed(collapsed: boolean): void {
+    this.isCollapsed = collapsed;
+    document.body.classList.toggle('sidebar-collapsed', collapsed);
   }
 
   logout(): void {

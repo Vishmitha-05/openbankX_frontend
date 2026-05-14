@@ -182,6 +182,9 @@ export class MyConsentsComponent implements OnInit {
         this.successMessage = `Consent #${consent.consentId} revoked.`;
         setTimeout(() => (this.successMessage = ''), 3000);
         this.cdr.detectChanges();
+      },
+      error: () => {
+        this.errorMessage = `Failed to revoke consent #${consent.consentId}. Please try again.`;
       }
     });
   }
