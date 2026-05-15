@@ -63,7 +63,6 @@ export const routes: Routes = [
       { path: 'health', loadComponent: () => import('./operations-portal/api-health/api-health.component').then(m => m.ApiHealthComponent) },
       { path: 'throttle-log', loadComponent: () => import('./operations-portal/throttle-log/throttle-log.component').then(m => m.ThrottleLogComponent) },
       { path: 'incidents', loadComponent: () => import('./operations-portal/incident-management/incident-management.component').then(m => m.IncidentManagementComponent) },
-      { path: 'latency', loadComponent: () => import('./operations-portal/latency-charts/latency-charts.component').then(m => m.LatencyChartsComponent) },
       { path: '', redirectTo: 'health', pathMatch: 'full' }
     ]
   },

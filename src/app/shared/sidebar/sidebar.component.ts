@@ -48,7 +48,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { label: 'API Health',     route: '/operations/health',      icon: 'fas fa-heartbeat' },
     { label: 'Throttle Log',   route: '/operations/throttle-log', icon: 'fas fa-tachometer-alt' },
     { label: 'Incidents',      route: '/operations/incidents',   icon: 'fas fa-exclamation-triangle' },
-    { label: 'Latency Charts', route: '/operations/latency',     icon: 'fas fa-chart-line' },
     { label: 'Consent Registry', route: '/compliance/consents',  icon: 'fas fa-file-contract' },
     { label: 'SCA Stats',      route: '/compliance/sca',         icon: 'fas fa-chart-pie' },
     { label: 'Audit Trail',    route: '/compliance/audit',       icon: 'fas fa-search' },

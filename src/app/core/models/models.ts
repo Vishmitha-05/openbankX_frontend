@@ -83,6 +83,8 @@ export interface TPP {
   contactInfo: string;
   certificationRef: string;
   status: 'SANDBOX' | 'PRODUCTION' | 'SUSPENDED';
+  /** Login email of the user who registered this TPP. Stamped server-side. */
+  ownerEmail?: string;
 }
 
 export interface TPPApp {

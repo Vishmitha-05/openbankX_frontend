@@ -34,11 +34,28 @@ export class TppService {
     return this.http.get<TPP[]>(`${this.apiUrl}/tpps`);
   }
 
-  /** Return only TPP companies owned by the given user email. */
+  /**
+   * Return only the TPP companies registered by the given user.
+   *
+   * Match on EITHER:
+   *   - `ownerEmail` — server-stamped from the JWT subject at register
+   *     time (reliable, can't be spoofed by the client).
+   *   - `contactInfo` — the email the user typed in the TPP form, used as
+   *     a fallback so TPPs created BEFORE the backend learned about
+   *     `ownerEmail` (legacy rows where the column is null) still show up
+   *     for whoever typed their login email as contact.
+   *
+   * Both compared case-insensitively after trimming.
+   */
   getMyTpps(ownerEmail: string): Observable<TPP[]> {
     const email = (ownerEmail || '').trim().toLowerCase();
+    if (!email) return this.getTpps().pipe(map(() => []));
     return this.getTpps().pipe(
-      map(tpps => (tpps || []).filter(t => (t.contactInfo || '').trim().toLowerCase() === email))
+      map(tpps => (tpps || []).filter(t => {
+        const owner   = (t.ownerEmail   || '').trim().toLowerCase();
+        const contact = (t.contactInfo  || '').trim().toLowerCase();
+        return owner === email || contact === email;
+      }))
     );
   }
 
@@ -56,13 +73,21 @@ export class TppService {
     return this.http.get<TPPApp[]>(`${this.apiUrl}/apps`);
   }
 
-  /** Return only the apps belonging to TPP companies owned by the given user email. */
+  /**
+   * Return only apps whose parent TPP was registered by the given user.
+   * Same ownership rule as `getMyTpps`: match on either
+   * `tpp.ownerEmail` (server-stamped) or `tpp.contactInfo` (user-typed
+   * fallback, mainly for legacy rows).
+   */
   getMyApps(ownerEmail: string): Observable<TPPApp[]> {
     const email = (ownerEmail || '').trim().toLowerCase();
+    if (!email) return this.getApps().pipe(map(() => []));
     return this.getApps().pipe(
-      map(apps => (apps || []).filter(a =>
-        (a.tpp?.contactInfo || '').trim().toLowerCase() === email
-      ))
+      map(apps => (apps || []).filter(a => {
+        const owner   = (a.tpp?.ownerEmail   || '').trim().toLowerCase();
+        const contact = (a.tpp?.contactInfo  || '').trim().toLowerCase();
+        return owner === email || contact === email;
+      }))
     );
   }
 
