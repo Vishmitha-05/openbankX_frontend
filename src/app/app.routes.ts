@@ -32,7 +32,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ========== Portal 2: Customer ==========
   {
     path: 'customer',
     loadComponent: () => import('./customer-portal/customer-portal.component').then(m => m.CustomerPortalComponent),
@@ -53,7 +52,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ========== Portal 3: Operations ==========
   {
     path: 'operations',
     loadComponent: () => import('./operations-portal/operations-portal.component').then(m => m.OperationsPortalComponent),
