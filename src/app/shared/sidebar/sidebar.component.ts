@@ -31,8 +31,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { label: 'Register TPP',   route: '/developer/tpp-register',  icon: 'fas fa-building' },
     { label: 'My Apps',        route: '/developer/apps',          icon: 'fas fa-cube' },
     { label: 'Register App',   route: '/developer/apps/new',      icon: 'fas fa-plus-circle' },
-    { label: 'Subscribe Plan', route: '/developer/subscribe',     icon: 'fas fa-plug' },
-    { label: 'Analytics',      route: '/developer/analytics',     icon: 'fas fa-chart-bar' }
+    { label: 'Subscribe Plan', route: '/developer/subscribe',     icon: 'fas fa-plug' }
   ];
 
   customerMenu = [
@@ -50,8 +49,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     { label: 'Incidents',      route: '/operations/incidents',   icon: 'fas fa-exclamation-triangle' },
     { label: 'Consent Registry', route: '/compliance/consents',  icon: 'fas fa-file-contract' },
     { label: 'SCA Stats',      route: '/compliance/sca',         icon: 'fas fa-chart-pie' },
-    { label: 'Audit Trail',    route: '/compliance/audit',       icon: 'fas fa-search' },
-    { label: 'Reports',        route: '/compliance/reports',     icon: 'fas fa-file-alt' }
+    { label: 'Audit Trail',    route: '/compliance/audit',       icon: 'fas fa-search' }
   ];
 
   adminMenu = [

@@ -27,7 +27,6 @@ export const routes: Routes = [
       { path: 'apps/:id/keys', loadComponent: () => import('./developer-portal/keys-upload/keys-upload.component').then(m => m.KeysUploadComponent) },
       { path: 'tpp-register', loadComponent: () => import('./developer-portal/tpp-registration/tpp-registration.component').then(m => m.TppRegistrationComponent) },
       { path: 'subscribe', loadComponent: () => import('./developer-portal/subscribe-plan/subscribe-plan.component').then(m => m.SubscriptionPlanComponent) },
-      { path: 'analytics', loadComponent: () => import('./developer-portal/usage-analytics/usage-analytics.component').then(m => m.UsageAnalyticsComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
@@ -75,7 +74,6 @@ export const routes: Routes = [
       { path: 'consents', loadComponent: () => import('./compliance-portal/consent-registry/consent-registry.component').then(m => m.ConsentRegistryComponent) },
       { path: 'sca', loadComponent: () => import('./compliance-portal/sca-statistics/sca-statistics.component').then(m => m.ScaStatisticsComponent) },
       { path: 'audit', loadComponent: () => import('./compliance-portal/audit-trail/audit-trail.component').then(m => m.AuditTrailComponent) },
-      { path: 'reports', loadComponent: () => import('./compliance-portal/report-generation/report-generation.component').then(m => m.ReportGenerationComponent) },
       { path: '', redirectTo: 'consents', pathMatch: 'full' }
     ]
   },

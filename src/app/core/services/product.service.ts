@@ -109,4 +109,12 @@ export class ProductService {
       sub
     );
   }
+
+  /** Cancel an active subscription. Backend flips status to CANCELLED. */
+  cancelSubscription(subscriptionId: number): Observable<TPPSubscription> {
+    return this.http.put<TPPSubscription>(
+      `${this.apiUrl}/subscriptions/${subscriptionId}/cancel`,
+      {}
+    );
+  }
 }

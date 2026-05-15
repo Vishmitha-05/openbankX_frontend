@@ -26,6 +26,8 @@ export class SubscriptionPlanComponent implements OnInit {
   isLoading = true;
   isSubscribing = false;
   submitAttempted = false;
+  /** Subscription id currently being cancelled — drives the spinner / disabled state on the Cancel button. */
+  cancellingId: number | null = null;
   errorMessage = '';
   successMessage = '';
 
@@ -163,6 +165,37 @@ export class SubscriptionPlanComponent implements OnInit {
         } else {
           this.errorMessage = `Subscription failed (HTTP ${err?.status || '?'})`;
         }
+      }
+    });
+  }
+
+  /* ---------------- Cancel ---------------- */
+
+  cancelSubscription(sub: TPPSubscription): void {
+    if (!sub?.subscriptionId || sub.status !== 'ACTIVE') return;
+    if (!confirm(`Cancel subscription #${sub.subscriptionId}? The app will lose access to "${sub.apiPlan?.apiProduct?.name || 'this plan'}" immediately.`)) {
+      return;
+    }
+
+    this.cancellingId = sub.subscriptionId;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.productService.cancelSubscription(sub.subscriptionId).subscribe({
+      next: (updated) => {
+        this.cancellingId = null;
+        // Reflect status locally so the row's badge / button update immediately;
+        // also re-fetch so anything the server changed shows through.
+        sub.status = updated?.status || 'CANCELLED';
+        this.successMessage = `Subscription #${sub.subscriptionId} cancelled.`;
+        this.loadSubscriptions();
+        setTimeout(() => (this.successMessage = ''), 3000);
+      },
+      error: (err) => {
+        this.cancellingId = null;
+        const serverMsg = err?.error?.message || err?.error?.error;
+        this.errorMessage = serverMsg
+          || `Failed to cancel subscription #${sub.subscriptionId} (HTTP ${err?.status || '?'}).`;
       }
     });
   }

@@ -112,6 +112,7 @@
             <th>Status</th>
             <th>Subscribed</th>
             <th>Expires</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -133,6 +134,20 @@
             </td>
             <td class="text-sm">{{ sub.subscribedDate | date:'mediumDate' }}</td>
             <td class="text-sm">{{ sub.expiryDate | date:'mediumDate' }}</td>
+            <td>
+              <button class="btn btn-sm btn-danger"
+                      *ngIf="sub.status === 'ACTIVE'"
+                      [disabled]="cancellingId === sub.subscriptionId"
+                      (click)="cancelSubscription(sub)">
+                <span *ngIf="cancellingId !== sub.subscriptionId">
+                  <i class="fas fa-times"></i> Cancel
+                </span>
+                <span *ngIf="cancellingId === sub.subscriptionId">
+                  <i class="fas fa-spinner fa-spin"></i> Cancelling…
+                </span>
+              </button>
+              <span class="text-sm text-muted" *ngIf="sub.status !== 'ACTIVE'">—</span>
+            </td>
           </tr>
         </tbody>
       </table>
